@@ -1,4 +1,4 @@
-const { ApiClient, RefreshableAuthProvider, StaticAuthProvider, ClientCredentialsAuthProvider } = require('twitch');
+const { ApiClient, RefreshableAuthProvider, StaticAuthProvider } = require('twitch');
 const { PubSubClient } = require('twitch-pubsub-client');
 const tmi = require('tmi.js');
 
@@ -12,6 +12,7 @@ const refresh = new RefreshableAuthProvider(authProvider, {
 } );
 const apiClient = new ApiClient({ authProvider });
 const pubSubClient = new PubSubClient();
+const targetChannel = 'tungdiiltv';
 
 const opts = {
 	identity: {
@@ -19,8 +20,8 @@ const opts = {
 		password: process.env.CHAT_OAUTH_TOKEN
 	},
 	channels: [
-		'strohgelaender',
-		'tungdiiltv'
+		targetChannel,
+		'strohgelaender' //debug channel
 	]
 };
 const chatClient = new tmi.client(opts);
@@ -43,7 +44,19 @@ async function startup() {
 
 	//Tung: 444384436
 	pubSubClient.onRedemption('444384436', function(message) {
-		console.log(message);
+		if (message.id === '3918cc27-4b68-4cd1-90c2-c7f39165485d') {
+			onZwergReward(CAPE, 60000);
+		} else if (message.id  === '7485f8d7-d39c-4530-a32e-eb35e3f6d5b9') {
+			onZwergReward(BART, 60000);
+		} else if (message.id  === 'd17a39e8-6a12-4fe9-95dc-25cf20b8f66f') {
+			onZwergReward(HELM, 60000);
+		} else if (message.id  === '2e6518e0-eba3-4ace-b219-233d4374f0ab') {
+			rewardAll(60000);
+		} else if (message.id  === '1c845b56-5e7d-48b2-82ec-a78a41486fdd') {
+			chatClient.say(targetChannel, '!addpoints ' + message.userName + ' 500 🤖');
+		} else if (message.id  === 'cfce5fc5-0da5-4078-a905-90a92ffdffd4') {
+			chatClient.say(targetChannel, '!addpoints ' + message.userName + ' 6000 🤖');
+		}
 	}).catch(reason => console.error(reason));
 }
 
@@ -76,29 +89,15 @@ function onMessageHandler(target, context, message, self) {
 		chatClient.say(target, 'Mit !add LEV-ELC-ODE können SMM2-Level zur Queue hinzugefügt werden.');
 	} else if (lmsg === '!queue') {
 		chatClient.say(target, 'https://warp.world/streamqueue?streamer=tungdiiltv');
-	} else if (context.hasOwnProperty('custom-reward-id')) {
-		if (context['custom-reward-id'] === '3918cc27-4b68-4cd1-90c2-c7f39165485d') {
-			onZwergReward(target, CAPE, 60000);
-		} else if (context['custom-reward-id'] === '7485f8d7-d39c-4530-a32e-eb35e3f6d5b9') {
-			onZwergReward(target, BART, 60000);
-		} else if (context['custom-reward-id'] === 'd17a39e8-6a12-4fe9-95dc-25cf20b8f66f') {
-			onZwergReward(target, HELM, 60000);
-		} else if (context['custom-reward-id'] === '2e6518e0-eba3-4ace-b219-233d4374f0ab') {
-			rewardAll(target, 60000);
-		} else if (context['custom-reward-id'] === '1c845b56-5e7d-48b2-82ec-a78a41486fdd') {
-			chatClient.say(target, '!addpoints ' + context['display-name'] + ' 500 🤖');
-		} else if (context['custom-reward-id'] === 'cfce5fc5-0da5-4078-a905-90a92ffdffd4') {
-			chatClient.say(target, '!addpoints ' + context['display-name'] + ' 6000 🤖');
-		}
 	} else if (isModerator(context)) {
 		if (lmsg === '!cape') {
-			onZwergReward(target, CAPE);
+			onZwergReward(CAPE, 0, target);
 		} else if (lmsg === '!bart') {
-			onZwergReward(target, BART);
+			onZwergReward(BART, 0, target);
 		} else if (lmsg === '!helm') {
-			onZwergReward(target, HELM);
+			onZwergReward(HELM, 0, target);
 		} else if (lmsg === '!rüstung' || lmsg === '!kraft' || lmsg === '!all') {
-			rewardAll(target);
+			rewardAll(0, target);
 		}
 	}
 }
@@ -107,37 +106,34 @@ function isModerator(context) {
 	return context['mod'] || (context['badges'] !== null && context['badges'].hasOwnProperty('broadcaster'));
 }
 
-function onZwergReward(target, slotID, additionalTime) {
-	const time = additionalTime === undefined ? 0 : additionalTime;
+function onZwergReward(slotID, time = 0, target = targetChannel) {
 	updateTime(slotID, time);
 	chatClient.say(target, 'Tung muss ' + zwergStrings[slotID] + ' bis ' + makeTwoDigit(zwergTime[slotID].getHours()) + ':' + makeTwoDigit(zwergTime[slotID].getMinutes()) + ' tragen. 🤖');
 	setTimeout(function() {
-		checkTime(target, slotID);
+		checkTime(slotID, target);
 	}, addTime + 5 + time);
 }
 
-function rewardAll(target, additionalTime) {
-	const time = additionalTime === undefined ? 0 : additionalTime;
+function rewardAll(time = 0, target = targetChannel) {
 	updateTime(CAPE, time);
 	updateTime(BART, time);
 	updateTime(HELM, time);
 	chatClient.say(target, 'Tung hat die Zwergenrüstung angezogen! CoolCat 🤖');
 	setTimeout(function() {
-		checkTime(target, CAPE);
-		checkTime(target, BART);
-		checkTime(target, HELM);
+		checkTime(CAPE, target);
+		checkTime(BART, target);
+		checkTime(HELM, target);
 	}, addTime + 5 + time);
 }
 
-function updateTime(slotID, additionalTime) {
-	const time = additionalTime === undefined ? 0 : additionalTime;
+function updateTime(slotID, time = 0) {
 	if (zwergTime[slotID] === undefined)
 		zwergTime[slotID] = new Date(new Date().getTime() + addTime + time);
 	else
 		zwergTime[slotID] = new Date(zwergTime[slotID].getTime() + addTime + time);
 }
 
-function checkTime(target, slotID) {
+function checkTime(slotID, target) {
 	if (zwergTime[slotID] === undefined)
 		return;
 	if (zwergTime[slotID] <= new Date()) {
@@ -145,7 +141,7 @@ function checkTime(target, slotID) {
 		zwergTime[slotID] = undefined;
 	} else {
 		setTimeout(function() {
-			checkTime(target, slotID);
+			checkTime(slotID, target);
 		}, addTime);
 	}
 }

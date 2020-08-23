@@ -90,8 +90,6 @@ function onMessageHandler(target, context, message, self) {
 		|| msg.match('.* ist all in gegangen und .* verloren. .*'))
 		&& context['user-id'] === '100135110') {
 		chatClient.say(target, 'LUL');
-	} else if (lmsg.startsWith('!level')) {
-		chatClient.say(target, 'Mit !add LEV-ELC-ODE können SMM2-Level zur Queue hinzugefügt werden.');
 	} else if (lmsg === '!queue') {
 		chatClient.say(target, 'https://warp.world/streamqueue?streamer=tungdiiltv');
 	} else if (isModerator(context)) {

@@ -47,8 +47,7 @@ async function startup() {
 	//Tung: 444384436
 	pubSubClient.onRedemption('444384436', function(message) {
 		//Log
-		const currentdate = new Date();
-		console.log(currentdate.getHours() + ":" + currentdate.getMinutes() + ":"  + currentdate.getSeconds() + ` ` + message.userDisplayName + ': redemption: ' + message.rewardName + ' (' + message.rewardCost +  ')');
+		console.log(`${currentTimeString()} ${message.userDisplayName}: redemption: ${message.rewardName} (${message.rewardCost})`);
 
 		if (message.rewardId === '3918cc27-4b68-4cd1-90c2-c7f39165485d') {
 			onZwergReward(CAPE, 60000);
@@ -59,16 +58,16 @@ async function startup() {
 		} else if (message.rewardId  === '2e6518e0-eba3-4ace-b219-233d4374f0ab') {
 			rewardAll(60000);
 		} else if (message.rewardId  === '1c845b56-5e7d-48b2-82ec-a78a41486fdd') {
-			chatClient.say(targetChannel, '!addpoints ' + message.userName + ' 500 🤖');
+			chatClient.say(targetChannel, `!addpoints ${message.userName} 500 🤖`);
 		} else if (message.rewardId  === 'cfce5fc5-0da5-4078-a905-90a92ffdffd4') {
-			chatClient.say(targetChannel, '!addpoints ' + message.userName + ' 6000 🤖');
+			chatClient.say(targetChannel, `!addpoints ${message.userName} 6000 🤖`);
 		} else if (message.rewardId === '4134f9e6-aeb6-43fa-a501-5cf3410b7d78') {
 			chatClient.say(targetChannel, '/emoteonly');
 			setTimeout(function() {
 				chatClient.say(targetChannel, '/emoteonlyoff');
 			}, 2 * 60000);
 		} else if (message.rewardId === 'b28d8dc9-adf6-4ab7-b75e-6ae55102d148') {
-			chatClient.say(targetChannel, '/timeout ' + message.userName + ' 120');
+			chatClient.say(targetChannel, `/timeout ${message.userName} 120 Kanalbelohnung eingelöst. 🤖 `);
 		}
 	}).catch(reason => console.error(reason));
 }
@@ -84,8 +83,7 @@ function onMessageHandler(target, context, message, self) {
 	const lmsg = msg.toLowerCase();
 
 	//log
-	const currentdate = new Date();
-	console.log(currentdate.getHours() + ":" + currentdate.getMinutes() + ":"  + currentdate.getSeconds() + ` ` + context['display-name'] + ': ' + msg);
+	console.log(`${currentTimeString()} ${context['display-name']}: ${msg}`);
 
 	if (lmsg.includes('tungdoof') && !msg.includes('tungdiDoof')) {
 		chatClient.say(target, 'tungdiDoof');
@@ -116,7 +114,7 @@ function isModerator(context) {
 
 function onZwergReward(slotID, time = 0, target = targetChannel) {
 	updateTime(slotID, time);
-	chatClient.say(target, 'Tung muss ' + zwergStrings[slotID] + ' bis ' + makeTwoDigit(zwergTime[slotID].getHours()) + ':' + makeTwoDigit(zwergTime[slotID].getMinutes()) + ' tragen. 🤖');
+	chatClient.say(target, `Tung muss ${zwergStrings[slotID]} bis ${makeTwoDigit(zwergTime[slotID].getHours())}:${makeTwoDigit(zwergTime[slotID].getMinutes())} tragen. 🤖`);
 	setTimeout(function() {
 		checkTime(slotID, target);
 	}, addTime + 5 + time);
@@ -145,13 +143,18 @@ function checkTime(slotID, target) {
 	if (zwergTime[slotID] === undefined)
 		return;
 	if (zwergTime[slotID] <= new Date()) {
-		chatClient.say(target, 'Du kannst jetzt ' + zwergStrings[slotID] + ' abnehmen Tung. 🤖');
+		chatClient.say(target, `Du kannst jetzt ${zwergStrings[slotID]} abnehmen Tung. 🤖`);
 		zwergTime[slotID] = undefined;
 	} else {
 		setTimeout(function() {
 			checkTime(slotID, target);
 		}, addTime);
 	}
+}
+
+function currentTimeString() {
+	const date = new Date();
+	return `${makeTwoDigit(date.getHours())}:${makeTwoDigit(date.getMinutes())}:${makeTwoDigit(date.getSeconds())}`;
 }
 
 function makeTwoDigit(value) {

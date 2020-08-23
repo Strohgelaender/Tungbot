@@ -28,6 +28,8 @@ const opts = {
 };
 const chatClient = new tmi.client(opts);
 
+let waterCount = 0; //TODO save value
+
 const addTime = 30 * 60000;
 const CAPE = 0;
 const BART = 1;
@@ -68,6 +70,9 @@ async function startup() {
 			}, 2 * 60000);
 		} else if (message.rewardId === 'b28d8dc9-adf6-4ab7-b75e-6ae55102d148') {
 			chatClient.say(targetChannel, `/timeout ${message.userName} 120 Kanalbelohnung eingelöst. 🤖 `);
+		} else if (message.rewardId === '6da58703-f497-4483-ac97-45ed011644e9') {
+			waterCount++;
+			chatClient.say(targetChannel, `🚰 Tung hat heute ${waterCount} Schluck Wasser getrunken. Prost! 🤖`);
 		}
 	}).catch(reason => console.error(reason));
 }

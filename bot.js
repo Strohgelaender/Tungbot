@@ -1,18 +1,17 @@
 const { ApiClient, RefreshableAuthProvider, StaticAuthProvider, ClientCredentialsAuthProvider } = require('twitch');
 const { PubSubClient } = require('twitch-pubsub-client');
+const tmi = require('tmi.js');
 
 require('dotenv').config();
 
 const scopes = 'channel:read:redemptions user:read:email chat:edit chat:read'
-const authProvider = new StaticAuthProvider(process.env.CLIENT_ID, process.env.CHANNEl_OAUTH_TOKEN);
+const authProvider = new StaticAuthProvider(process.env.CLIENT_ID, process.env.CHANNEL_OAUTH_TOKEN);
 const refresh = new RefreshableAuthProvider(authProvider, {
 	clientSecret: process.env.CLIENT_SECRET,
-	refreshToken: process.env.CHANNEl_REFRESH_TOKEN
+	refreshToken: process.env.CHANNEL_REFRESH_TOKEN
 } );
 const apiClient = new ApiClient({ authProvider });
 const pubSubClient = new PubSubClient();
-
-const tmi = require('tmi.js');
 
 const opts = {
 	identity: {
@@ -33,7 +32,7 @@ const HELM = 2;
 let zwergTime = [undefined, undefined, undefined];
 const zwergStrings = ['das Cape', 'den Bart', 'den Helm'];
 
-startup().then(r => console.log('chat client stared')).catch(e => console.error('startup failed', e));
+startup().then(r => console.log('chat client started')).catch(e => console.error('startup failed', e));
 
 async function startup() {
 	chatClient.on('message', onMessageHandler);

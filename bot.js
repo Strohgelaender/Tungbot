@@ -1,5 +1,5 @@
-const { ApiClient, RefreshableAuthProvider, StaticAuthProvider } = require('twitch');
-const { PubSubClient } = require('twitch-pubsub-client');
+const {ApiClient, RefreshableAuthProvider, StaticAuthProvider} = require('twitch');
+const {PubSubClient} = require('twitch-pubsub-client');
 const tmi = require('tmi.js');
 
 require('dotenv').config();
@@ -12,7 +12,7 @@ const authProvider = new RefreshableAuthProvider(
 		refreshToken: process.env.CHANNEL_REFRESH_TOKEN,
 	}
 );
-const apiClient = new ApiClient({ authProvider });
+const apiClient = new ApiClient({authProvider});
 const pubSubClient = new PubSubClient();
 const targetChannel = '#tungdiiltv';
 
@@ -51,15 +51,15 @@ async function startup() {
 
 		if (message.rewardId === '3918cc27-4b68-4cd1-90c2-c7f39165485d') {
 			onZwergReward(CAPE, 60000);
-		} else if (message.rewardId  === '7485f8d7-d39c-4530-a32e-eb35e3f6d5b9') {
+		} else if (message.rewardId === '7485f8d7-d39c-4530-a32e-eb35e3f6d5b9') {
 			onZwergReward(BART, 60000);
-		} else if (message.rewardId  === 'd17a39e8-6a12-4fe9-95dc-25cf20b8f66f') {
+		} else if (message.rewardId === 'd17a39e8-6a12-4fe9-95dc-25cf20b8f66f') {
 			onZwergReward(HELM, 60000);
-		} else if (message.rewardId  === '2e6518e0-eba3-4ace-b219-233d4374f0ab') {
+		} else if (message.rewardId === '2e6518e0-eba3-4ace-b219-233d4374f0ab') {
 			rewardAll(60000);
-		} else if (message.rewardId  === '1c845b56-5e7d-48b2-82ec-a78a41486fdd') {
+		} else if (message.rewardId === '1c845b56-5e7d-48b2-82ec-a78a41486fdd') {
 			chatClient.say(targetChannel, `!addpoints ${message.userName} 500 🤖`);
-		} else if (message.rewardId  === 'cfce5fc5-0da5-4078-a905-90a92ffdffd4') {
+		} else if (message.rewardId === 'cfce5fc5-0da5-4078-a905-90a92ffdffd4') {
 			chatClient.say(targetChannel, `!addpoints ${message.userName} 6000 🤖`);
 		} else if (message.rewardId === '4134f9e6-aeb6-43fa-a501-5cf3410b7d78') {
 			chatClient.say(targetChannel, '/emoteonly');
@@ -77,7 +77,8 @@ function onConnectedHandler(addr, port) {
 }
 
 function onMessageHandler(target, context, message, self) {
-	if (self) { return; } // Ignore messages from the bot
+	if (self) // Ignore messages from the bot
+		return;
 
 	const msg = message.trim();
 	const lmsg = msg.toLowerCase();

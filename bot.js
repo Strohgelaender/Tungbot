@@ -47,34 +47,7 @@ async function startup() {
 	await pubSubClient.registerUserListener(apiClient);
 
 	//Tung: 444384436
-	pubSubClient.onRedemption('444384436', function(message) {
-		//Log
-		console.log(`${currentTimeString()} ${message.userDisplayName}: redemption: ${message.rewardName} (${message.rewardCost})`);
-
-		if (message.rewardId === '3918cc27-4b68-4cd1-90c2-c7f39165485d') {
-			onZwergReward(CAPE, 60000);
-		} else if (message.rewardId === '7485f8d7-d39c-4530-a32e-eb35e3f6d5b9') {
-			onZwergReward(BART, 60000);
-		} else if (message.rewardId === 'd17a39e8-6a12-4fe9-95dc-25cf20b8f66f') {
-			onZwergReward(HELM, 60000);
-		} else if (message.rewardId === '2e6518e0-eba3-4ace-b219-233d4374f0ab') {
-			rewardAll(60000);
-		} else if (message.rewardId === '1c845b56-5e7d-48b2-82ec-a78a41486fdd') {
-			chatClient.say(targetChannel, `!addpoints ${message.userName} 500 🤖`);
-		} else if (message.rewardId === 'cfce5fc5-0da5-4078-a905-90a92ffdffd4') {
-			chatClient.say(targetChannel, `!addpoints ${message.userName} 6000 🤖`);
-		} else if (message.rewardId === '4134f9e6-aeb6-43fa-a501-5cf3410b7d78') {
-			chatClient.say(targetChannel, '/emoteonly');
-			setTimeout(function() {
-				chatClient.say(targetChannel, '/emoteonlyoff');
-			}, 2 * 60000);
-		} else if (message.rewardId === 'b28d8dc9-adf6-4ab7-b75e-6ae55102d148') {
-			chatClient.say(targetChannel, `/timeout ${message.userName} 120 Kanalbelohnung eingelöst. 🤖 `);
-		} else if (message.rewardId === '6da58703-f497-4483-ac97-45ed011644e9') {
-			waterCount++;
-			chatClient.say(targetChannel, `🚰 Tung hat heute ${waterCount} Schluck Wasser getrunken. Prost! 🤖`);
-		}
-	}).catch(reason => console.error(reason));
+	await pubSubClient.onRedemption('444384436', onChannelPointHandler);
 }
 
 function onConnectedHandler(addr, port) {
@@ -111,6 +84,35 @@ function onMessageHandler(target, context, message, self) {
 		} else if (lmsg === '!rüstung' || lmsg === '!kraft' || lmsg === '!all') {
 			rewardAll(0, target);
 		}
+	}
+}
+
+function onChannelPointHandler(message) {
+	//Log
+	console.log(`${currentTimeString()} ${message.userDisplayName}: redemption: ${message.rewardName} (${message.rewardCost})`);
+
+	if (message.rewardId === '3918cc27-4b68-4cd1-90c2-c7f39165485d') {
+		onZwergReward(CAPE, addTime + 60000);
+	} else if (message.rewardId === '7485f8d7-d39c-4530-a32e-eb35e3f6d5b9') {
+		onZwergReward(BART, addTime + 60000);
+	} else if (message.rewardId === 'd17a39e8-6a12-4fe9-95dc-25cf20b8f66f') {
+		onZwergReward(HELM, addTime + 60000);
+	} else if (message.rewardId === '2e6518e0-eba3-4ace-b219-233d4374f0ab') {
+		rewardAll(60000);
+	} else if (message.rewardId === '1c845b56-5e7d-48b2-82ec-a78a41486fdd') {
+		chatClient.say(targetChannel, `!addpoints ${message.userName} 500 🤖`);
+	} else if (message.rewardId === 'cfce5fc5-0da5-4078-a905-90a92ffdffd4') {
+		chatClient.say(targetChannel, `!addpoints ${message.userName} 6000 🤖`);
+	} else if (message.rewardId === '4134f9e6-aeb6-43fa-a501-5cf3410b7d78') {
+		chatClient.say(targetChannel, '/emoteonly');
+		setTimeout(function() {
+			chatClient.say(targetChannel, '/emoteonlyoff');
+		}, 2 * 60000);
+	} else if (message.rewardId === 'b28d8dc9-adf6-4ab7-b75e-6ae55102d148') {
+		chatClient.say(targetChannel, `/timeout ${message.userName} 120 Kanalbelohnung eingelöst. 🤖 `);
+	} else if (message.rewardId === '6da58703-f497-4483-ac97-45ed011644e9') {
+		waterCount++;
+		chatClient.say(targetChannel, `🚰 Tung hat heute ${waterCount} Schluck Wasser getrunken. Prost! 🤖`);
 	}
 }
 

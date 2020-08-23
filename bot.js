@@ -36,6 +36,7 @@ const BART = 1;
 const HELM = 2;
 let zwergTime = [undefined, undefined, undefined];
 const zwergStrings = ['das Cape', 'den Bart', 'den Helm'];
+let zwergHandlers = [undefined, undefined, undefined];
 
 startup().then(r => console.log('chat client started')).catch(e => console.error('startup failed', e));
 
@@ -75,14 +76,16 @@ function onMessageHandler(target, context, message, self) {
 	} else if (lmsg === '!queue') {
 		chatClient.say(target, 'https://warp.world/streamqueue?streamer=tungdiiltv');
 	} else if (isModerator(context)) {
-		if (lmsg === '!cape') {
-			onZwergReward(CAPE, 0, target);
-		} else if (lmsg === '!bart') {
-			onZwergReward(BART, 0, target);
-		} else if (lmsg === '!helm') {
-			onZwergReward(HELM, 0, target);
+		if (lmsg.match('^!(cape|bart|helm)$')) {
+			//manual reward call
+			onZwergReward(text2Slot(lmsg), addTime, target);
 		} else if (lmsg === '!rüstung' || lmsg === '!kraft' || lmsg === '!all') {
-			rewardAll(0, target);
+			rewardAll(target);
+		} else if (lmsg.match('^!(cape|bart|helm) add -?\\d+$')) {
+			//add / remove time
+			const id = text2Slot(lmsg.substring(0, 5));
+			const time = parseInt(lmsg.substring(10)) * 60000;
+			onZwergReward(id, time, target);
 		}
 	}
 }
@@ -92,13 +95,13 @@ function onChannelPointHandler(message) {
 	console.log(`${currentTimeString()} ${message.userDisplayName}: redemption: ${message.rewardName} (${message.rewardCost})`);
 
 	if (message.rewardId === '3918cc27-4b68-4cd1-90c2-c7f39165485d') {
-		onZwergReward(CAPE, addTime + 60000);
+		onZwergReward(CAPE, getTime(CAPE));
 	} else if (message.rewardId === '7485f8d7-d39c-4530-a32e-eb35e3f6d5b9') {
-		onZwergReward(BART, addTime + 60000);
+		onZwergReward(BART, getTime(BART));
 	} else if (message.rewardId === 'd17a39e8-6a12-4fe9-95dc-25cf20b8f66f') {
-		onZwergReward(HELM, addTime + 60000);
+		onZwergReward(HELM, getTime(HELM));
 	} else if (message.rewardId === '2e6518e0-eba3-4ace-b219-233d4374f0ab') {
-		rewardAll(60000);
+		rewardAll();
 	} else if (message.rewardId === '1c845b56-5e7d-48b2-82ec-a78a41486fdd') {
 		chatClient.say(targetChannel, `!addpoints ${message.userName} 500 🤖`);
 	} else if (message.rewardId === 'cfce5fc5-0da5-4078-a905-90a92ffdffd4') {
@@ -120,44 +123,57 @@ function isModerator(context) {
 	return context['mod'] || (context['badges'] !== null && context['badges'].hasOwnProperty('broadcaster'));
 }
 
-function onZwergReward(slotID, time = 0, target = targetChannel) {
+function text2Slot(msg) {
+	switch (msg) {
+		case '!cape':
+			return CAPE;
+		case '!bart':
+			return BART;
+		case '!helm':
+			return HELM;
+		default:
+			return -1;
+	}
+}
+
+function onZwergReward(slotID, time, target = targetChannel) {
 	updateTime(slotID, time);
 	chatClient.say(target, `Tung muss ${zwergStrings[slotID]} bis ${makeTwoDigit(zwergTime[slotID].getHours())}:${makeTwoDigit(zwergTime[slotID].getMinutes())} tragen. 🤖`);
-	setTimeout(function() {
-		checkTime(slotID, target);
-	}, addTime + 5 + time);
+	updateZwergTimeout(slotID, target);
 }
 
-function rewardAll(time = 0, target = targetChannel) {
-	updateTime(CAPE, time);
-	updateTime(BART, time);
-	updateTime(HELM, time);
-	chatClient.say(target, 'Tung hat die Zwergenrüstung angezogen! CoolCat 🤖');
-	setTimeout(function() {
-		checkTime(CAPE, target);
-		checkTime(BART, target);
-		checkTime(HELM, target);
-	}, addTime + 5 + time);
-}
-
-function updateTime(slotID, time = 0) {
-	if (zwergTime[slotID] === undefined)
-		zwergTime[slotID] = new Date(new Date().getTime() + addTime + time);
-	else
-		zwergTime[slotID] = new Date(zwergTime[slotID].getTime() + addTime + time);
-}
-
-function checkTime(slotID, target) {
-	if (zwergTime[slotID] === undefined)
-		return;
-	if (zwergTime[slotID] <= new Date()) {
+function updateZwergTimeout(slotID, target = targetChannel) {
+	if (zwergHandlers[slotID] !== undefined) {
+		clearTimeout(zwergHandlers[slotID]);
+	}
+	zwergHandlers[slotID] = setTimeout(function() {
 		chatClient.say(target, `Du kannst jetzt ${zwergStrings[slotID]} abnehmen Tung. 🤖`);
 		zwergTime[slotID] = undefined;
-	} else {
-		setTimeout(function() {
-			checkTime(slotID, target);
-		}, addTime);
+		zwergHandlers[slotID] = undefined;
+	}, zwergTime[slotID].getTime() - new Date().getTime());
+}
+
+function rewardAll(target = targetChannel) {
+	for (let i = 0; i < 3; i++) {
+		updateTime(i, getTime(i));
+		updateZwergTimeout(i, target);
 	}
+	chatClient.say(target, 'Tung hat die Zwergenrüstung angezogen! CoolCat 🤖');
+}
+
+//adds one Minute addition time
+//if the clothes are not being worn currently.
+function getTime(slotID) {
+	if (zwergTime[slotID] === undefined)
+		return addTime + 60000;
+	return addTime;
+}
+
+function updateTime(slotID, time = addTime) {
+	if (zwergTime[slotID] === undefined)
+		zwergTime[slotID] = new Date(new Date().getTime() + time);
+	else
+		zwergTime[slotID] = new Date(zwergTime[slotID].getTime() + time);
 }
 
 function currentTimeString() {

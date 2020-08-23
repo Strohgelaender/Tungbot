@@ -1,4 +1,5 @@
 const {ApiClient, RefreshableAuthProvider, StaticAuthProvider} = require('twitch');
+const {InvalidTokenError} = require('twitch-auth');
 const {PubSubClient} = require('twitch-pubsub-client');
 const tmi = require('tmi.js');
 
@@ -10,6 +11,10 @@ const authProvider = new RefreshableAuthProvider(
 	{
 		clientSecret: process.env.CLIENT_SECRET,
 		refreshToken: process.env.CHANNEL_REFRESH_TOKEN,
+		onRefresh: token => {
+			console.log('refreshed Token.');
+			//TODO save
+		}
 	}
 );
 const apiClient = new ApiClient({authProvider});
@@ -38,15 +43,29 @@ let zwergTime = [undefined, undefined, undefined];
 const zwergStrings = ['das Cape', 'den Bart', 'den Helm'];
 let zwergHandlers = [undefined, undefined, undefined];
 
-startup().then(r => console.log('chat client started')).catch(e => console.error('startup failed', e));
+startup().then(r => console.log('chat client started')).catch(e => {
+	if (e instanceof InvalidTokenError)
+		authProvider.refresh()
+			.then(r => connectPubSubClient())
+			.catch(e => console.error('startup failed', e));
+	else
+		console.error('startup failed', e);
+});
 
 async function startup() {
+	await connectChatClient();
+	await connectPubSubClient();
+}
+
+async function connectChatClient() {
 	chatClient.on('message', onMessageHandler);
 	chatClient.on('connected', onConnectedHandler);
 
 	await chatClient.connect();
-	await pubSubClient.registerUserListener(apiClient);
+}
 
+async function connectPubSubClient() {
+	await pubSubClient.registerUserListener(apiClient);
 	//Tung: 444384436
 	await pubSubClient.onRedemption('444384436', onChannelPointHandler);
 }

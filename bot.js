@@ -14,7 +14,7 @@ const authProvider = new RefreshableAuthProvider(
 );
 const apiClient = new ApiClient({ authProvider });
 const pubSubClient = new PubSubClient();
-const targetChannel = 'tungdiiltv';
+const targetChannel = '#tungdiiltv';
 
 const opts = {
 	identity: {
@@ -50,18 +50,25 @@ async function startup() {
 		const currentdate = new Date();
 		console.log(currentdate.getHours() + ":" + currentdate.getMinutes() + ":"  + currentdate.getSeconds() + ` ` + message.userDisplayName + ': redemption: ' + message.rewardName + ' (' + message.rewardCost +  ')');
 
-		if (message.id === '3918cc27-4b68-4cd1-90c2-c7f39165485d') {
+		if (message.rewardId === '3918cc27-4b68-4cd1-90c2-c7f39165485d') {
 			onZwergReward(CAPE, 60000);
-		} else if (message.id  === '7485f8d7-d39c-4530-a32e-eb35e3f6d5b9') {
+		} else if (message.rewardId  === '7485f8d7-d39c-4530-a32e-eb35e3f6d5b9') {
 			onZwergReward(BART, 60000);
-		} else if (message.id  === 'd17a39e8-6a12-4fe9-95dc-25cf20b8f66f') {
+		} else if (message.rewardId  === 'd17a39e8-6a12-4fe9-95dc-25cf20b8f66f') {
 			onZwergReward(HELM, 60000);
-		} else if (message.id  === '2e6518e0-eba3-4ace-b219-233d4374f0ab') {
+		} else if (message.rewardId  === '2e6518e0-eba3-4ace-b219-233d4374f0ab') {
 			rewardAll(60000);
-		} else if (message.id  === '1c845b56-5e7d-48b2-82ec-a78a41486fdd') {
+		} else if (message.rewardId  === '1c845b56-5e7d-48b2-82ec-a78a41486fdd') {
 			chatClient.say(targetChannel, '!addpoints ' + message.userName + ' 500 🤖');
-		} else if (message.id  === 'cfce5fc5-0da5-4078-a905-90a92ffdffd4') {
+		} else if (message.rewardId  === 'cfce5fc5-0da5-4078-a905-90a92ffdffd4') {
 			chatClient.say(targetChannel, '!addpoints ' + message.userName + ' 6000 🤖');
+		} else if (message.rewardId === '4134f9e6-aeb6-43fa-a501-5cf3410b7d78') {
+			chatClient.say(targetChannel, '/emoteonly');
+			setTimeout(function() {
+				chatClient.say(targetChannel, '/emoteonlyoff');
+			}, 2 * 60000);
+		} else if (message.rewardId === 'b28d8dc9-adf6-4ab7-b75e-6ae55102d148') {
+			chatClient.say(targetChannel, '/timeout ' + message.userName + ' 120');
 		}
 	}).catch(reason => console.error(reason));
 }
@@ -86,12 +93,7 @@ function onMessageHandler(target, context, message, self) {
 		|| msg.match('.* ist all in gegangen und .* verloren. .*'))
 		&& context['user-id'] === '100135110') {
 		chatClient.say(target, 'LUL');
-	} else if (lmsg.startsWith('!leaderboard') || lmsg.match('!top.*')) {
-		chatClient.say(target, 'Hier findest du die Nutzer, die am meisten Bier besitzen: https://streamelements.com/tungdiiltv/leaderboard 🤖');
-	} /* else if (lmsg === '!arena') {
-		//Smash Arena - Activate only at Smash Streams
-		client.say(target, 'Tungs Smash Arena ist offen für jeden. Joined mit diesen Daten: ID: 3CF23 PW: 111 🤖');
-	} */ else if (lmsg.startsWith('!level')) {
+	} else if (lmsg.startsWith('!level')) {
 		chatClient.say(target, 'Mit !add LEV-ELC-ODE können SMM2-Level zur Queue hinzugefügt werden.');
 	} else if (lmsg === '!queue') {
 		chatClient.say(target, 'https://warp.world/streamqueue?streamer=tungdiiltv');

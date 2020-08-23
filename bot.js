@@ -109,7 +109,7 @@ function onMessageHandler(target, context, message, self) {
 
 function onChannelPointHandler(message) {
 	//Log
-	console.log(`${currentTimeString()} ${message.userDisplayName}: redemption: ${message.rewardName} (${message.rewardCost})`);
+	console.log(`${currentTimeString()} [Redemption] ${message.userDisplayName}: ${message.rewardName} (${message.rewardCost})`);
 
 	if (message.rewardId === '3918cc27-4b68-4cd1-90c2-c7f39165485d') {
 		onZwergReward(CAPE, getTime(CAPE));

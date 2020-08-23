@@ -46,6 +46,10 @@ async function startup() {
 
 	//Tung: 444384436
 	pubSubClient.onRedemption('444384436', function(message) {
+		//Log
+		const currentdate = new Date();
+		console.log(currentdate.getHours() + ":" + currentdate.getMinutes() + ":"  + currentdate.getSeconds() + ` ` + message.userDisplayName + ': redemption: ' + message.rewardName + ' (' + message.rewardCost +  ')');
+
 		if (message.id === '3918cc27-4b68-4cd1-90c2-c7f39165485d') {
 			onZwergReward(CAPE, 60000);
 		} else if (message.id  === '7485f8d7-d39c-4530-a32e-eb35e3f6d5b9') {

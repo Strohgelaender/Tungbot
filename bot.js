@@ -86,14 +86,14 @@ function onConnectedHandler(addr, port) {
 }
 
 function onMessageHandler(target, context, message, self) {
-	if (self) // Ignore messages from the bot
-		return;
-
 	const msg = message.trim();
 	const lmsg = msg.toLowerCase();
 
 	//log
 	console.log(`${currentTimeString()} ${context['display-name']}: ${msg}`);
+
+	if (self) // Ignore messages from the bot
+		return;
 
 	if (lmsg.includes('tungdoof') && !msg.includes('tungdiDoof')) {
 		chatClient.say(target, 'tungdiDoof');

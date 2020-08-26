@@ -36,12 +36,8 @@ const chatClient = new tmi.client(opts);
 let waterCount = 0; //TODO save value
 
 const addTime = 30 * 60000;
-const CAPE = 0;
-const BART = 1;
-const HELM = 2;
-let zwergTime = [undefined, undefined, undefined];
-const zwergStrings = ['das Cape', 'den Bart', 'den Helm'];
-let zwergHandlers = [undefined, undefined, undefined];
+const CAPE = 0, BART = 1, HELM = 2;
+let clothing = [{name: 'das Cape'}, {name: 'den Bart'}, {name: 'den Helm'}];
 
 startup().then(() => console.log('chat client started')).catch(e => {
 	if (e instanceof InvalidTokenError)
@@ -173,21 +169,22 @@ function text2Slot(msg) {
 	}
 }
 
-function onZwergReward(slotID, time, target = targetChannel) {
-	updateTime(slotID, time);
-	chatClient.say(target, `Tung muss ${zwergStrings[slotID]} bis ${makeTwoDigit(zwergTime[slotID].getHours())}:${makeTwoDigit(zwergTime[slotID].getMinutes())} tragen. 🤖`);
-	updateZwergTimeout(slotID, target);
+function onZwergReward(slot, time, target = targetChannel) {
+	updateTime(slot, time);
+	const timeStr = `${makeTwoDigit(clothing[slot].time.getHours())}:${makeTwoDigit(clothing[slot].time.getMinutes())}`;
+	chatClient.say(target, `Tung muss ${clothing[slot].name} bis ${timeStr} tragen. 🤖`);
+	updateZwergTimeout(slot, target);
 }
 
-function updateZwergTimeout(slotID, target = targetChannel) {
-	if (zwergHandlers[slotID] !== undefined) {
-		clearTimeout(zwergHandlers[slotID]);
+function updateZwergTimeout(slot, target = targetChannel) {
+	if (clothing[slot].handler !== undefined) {
+		clearTimeout(clothing[slot].handler);
 	}
-	zwergHandlers[slotID] = setTimeout(function() {
-		chatClient.say(target, `Du kannst jetzt ${zwergStrings[slotID]} abnehmen Tung. 🤖`);
-		zwergTime[slotID] = undefined;
-		zwergHandlers[slotID] = undefined;
-	}, zwergTime[slotID].getTime() - new Date().getTime());
+	clothing[slot].handler = setTimeout(function() {
+		chatClient.say(target, `Du kannst jetzt ${clothing[slot].name} abnehmen Tung. 🤖`);
+		clothing[slot].time = undefined;
+		clothing[slot].handler = undefined;
+	}, clothing[slot].time.getTime() - new Date().getTime());
 }
 
 function rewardAll(target = targetChannel) {
@@ -200,17 +197,17 @@ function rewardAll(target = targetChannel) {
 
 //adds one Minute addition time
 //if the clothes are not being worn currently.
-function getTime(slotID) {
-	if (zwergTime[slotID] === undefined)
+function getTime(slot) {
+	if (clothing[slot].time === undefined)
 		return addTime + 60000;
 	return addTime;
 }
 
-function updateTime(slotID, time = addTime) {
-	if (zwergTime[slotID] === undefined)
-		zwergTime[slotID] = new Date(new Date().getTime() + time);
+function updateTime(slot, time = addTime) {
+	if (clothing[slot].time === undefined)
+		clothing[slot].time = new Date(new Date().getTime() + time);
 	else
-		zwergTime[slotID] = new Date(zwergTime[slotID].getTime() + time);
+		clothing[slot].time = new Date(clothing[slot].time.getTime() + time);
 }
 
 function currentTimeString() {

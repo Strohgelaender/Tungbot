@@ -37,7 +37,19 @@ let waterCount = 0; //TODO save value
 
 const addTime = 30 * 60000;
 const CAPE = 0, BART = 1, HELM = 2;
-let clothing = [{name: 'das Cape'}, {name: 'den Bart'}, {name: 'den Helm'}];
+let clothing = [{
+	name: 'das Cape',
+	handler: null,
+	time: null
+}, {
+	name: 'den Bart',
+	handler: null,
+	time: null
+}, {
+	name: 'den Helm',
+	handler: null,
+	time: null
+}];
 
 startup().then(() => console.log('chat client started')).catch(e => {
 	if (e instanceof InvalidTokenError)
@@ -124,7 +136,7 @@ function onChannelPointHandler(message) {
 		chatClient.say(targetChannel, `!addpoints ${message.userName} 6000 🤖`);
 	} else if (message.rewardId === '4134f9e6-aeb6-43fa-a501-5cf3410b7d78') {
 		chatClient.say(targetChannel, '/emoteonly');
-		setTimeout(function() {
+		setTimeout(function () {
 			chatClient.say(targetChannel, '/emoteonlyoff');
 		}, 2 * 60000);
 	} else if (message.rewardId === 'b28d8dc9-adf6-4ab7-b75e-6ae55102d148') {
@@ -177,13 +189,13 @@ function onZwergReward(slot, time, target = targetChannel) {
 }
 
 function updateZwergTimeout(slot, target = targetChannel) {
-	if (clothing[slot].handler !== undefined) {
+	if (clothing[slot].handler !== null) {
 		clearTimeout(clothing[slot].handler);
 	}
-	clothing[slot].handler = setTimeout(function() {
+	clothing[slot].handler = setTimeout(function () {
 		chatClient.say(target, `Du kannst jetzt ${clothing[slot].name} abnehmen Tung. 🤖`);
-		clothing[slot].time = undefined;
-		clothing[slot].handler = undefined;
+		clothing[slot].time = null;
+		clothing[slot].handler = null;
 	}, clothing[slot].time.getTime() - new Date().getTime());
 }
 
@@ -198,13 +210,13 @@ function rewardAll(target = targetChannel) {
 //adds one Minute addition time
 //if the clothes are not being worn currently.
 function getTime(slot) {
-	if (clothing[slot].time === undefined)
+	if (clothing[slot].time === null)
 		return addTime + 60000;
 	return addTime;
 }
 
 function updateTime(slot, time = addTime) {
-	if (clothing[slot].time === undefined)
+	if (clothing[slot].time === null)
 		clothing[slot].time = new Date(new Date().getTime() + time);
 	else
 		clothing[slot].time = new Date(clothing[slot].time.getTime() + time);

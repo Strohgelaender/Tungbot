@@ -43,10 +43,11 @@ let zwergTime = [undefined, undefined, undefined];
 const zwergStrings = ['das Cape', 'den Bart', 'den Helm'];
 let zwergHandlers = [undefined, undefined, undefined];
 
-startup().then(r => console.log('chat client started')).catch(e => {
+startup().then(() => console.log('chat client started')).catch(e => {
 	if (e instanceof InvalidTokenError)
 		authProvider.refresh()
-			.then(r => connectPubSubClient())
+			.then(() => connectPubSubClient())
+			.then(() => console.log('chat client started after refresh'))
 			.catch(e => console.error('startup failed', e));
 	else
 		console.error('startup failed', e);
@@ -60,6 +61,8 @@ async function startup() {
 async function connectChatClient() {
 	chatClient.on('message', onMessageHandler);
 	chatClient.on('connected', onConnectedHandler);
+	chatClient.on('raided', onRadiHandler);
+	chatClient.on('hosted', onHostHandler);
 
 	await chatClient.connect();
 }
@@ -133,6 +136,23 @@ function onChannelPointHandler(message) {
 	} else if (message.rewardId === '6da58703-f497-4483-ac97-45ed011644e9') {
 		waterCount++;
 		chatClient.say(targetChannel, `🚰 Tung hat heute ${waterCount} Schluck Wasser getrunken. Prost! 🤖`);
+	}
+}
+
+function onRadiHandler(channel, username, viewers) {
+	shoutout(channel, username, viewers);
+}
+
+function onHostHandler(channel, username, viewers, autohost) {
+	if (!autohost)
+		shoutout(channel, username, viewers);
+}
+
+function shoutout(channel, username, viewers) {
+	if (viewers >= 2) {
+		setTimeout(function () {
+			chatClient.say(channel, `!so ${username}`);
+		}, 7500);
 	}
 }
 

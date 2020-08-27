@@ -103,6 +103,8 @@ function onMessageHandler(target, context, message, self) {
 		chatClient.say(target, 'LUL');
 	} else if (lmsg === '!queue') {
 		chatClient.say(target, 'https://warp.world/streamqueue?streamer=tungdiiltv');
+	} else if (lmsg.match('!(cape|bart|helm) time') || (!isModerator(context) && lmsg.match('!(cape|bart|helm)'))) {
+		sendTime(text2Slot(lmsg));
 	} else if (isModerator(context)) {
 		if (lmsg.match('^!(cape|bart|helm)$')) {
 			//manual reward call
@@ -111,7 +113,7 @@ function onMessageHandler(target, context, message, self) {
 			rewardAll(target);
 		} else if (lmsg.match('^!(cape|bart|helm) add -?\\d+$')) {
 			//add / remove time
-			const id = text2Slot(lmsg.substring(0, 5));
+			const id = text2Slot(lmsg);
 			const time = parseInt(lmsg.substring(10)) * 60000;
 			onZwergReward(id, time, target);
 		}
@@ -169,6 +171,11 @@ function isModerator(context) {
 }
 
 function text2Slot(msg) {
+	if (msg.length < 5)
+		return -1;
+	else if (msg.length > 5)
+		msg = msg.substring(0, 5);
+
 	switch (msg) {
 		case '!cape':
 			return CAPE;
@@ -183,9 +190,13 @@ function text2Slot(msg) {
 
 function onZwergReward(slot, time, target = targetChannel) {
 	updateTime(slot, time);
+	sendTime(slot, target);
+	updateZwergTimeout(slot, target);
+}
+
+function sendTime(slot, target = targetChannel) {
 	const timeStr = `${makeTwoDigit(clothing[slot].time.getHours())}:${makeTwoDigit(clothing[slot].time.getMinutes())}`;
 	chatClient.say(target, `Tung muss ${clothing[slot].name} bis ${timeStr} tragen. 🤖`);
-	updateZwergTimeout(slot, target);
 }
 
 function updateZwergTimeout(slot, target = targetChannel) {

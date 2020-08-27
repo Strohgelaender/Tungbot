@@ -150,10 +150,12 @@ function onChannelPointHandler(message) {
 }
 
 function onRadiHandler(channel, username, viewers) {
+	console.log(`[Raid] ${username} (${viewers})`)
 	shoutout(channel, username, viewers);
 }
 
 function onHostHandler(channel, username, viewers, autohost) {
+	console.log(`[Host] ${username} (${viewers})`);
 	if (!autohost)
 		shoutout(channel, username, viewers);
 }

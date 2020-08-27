@@ -197,8 +197,12 @@ function onZwergReward(slot, time, target = targetChannel) {
 }
 
 function sendTime(slot, target = targetChannel) {
-	const timeStr = `${makeTwoDigit(clothing[slot].time.getHours())}:${makeTwoDigit(clothing[slot].time.getMinutes())}`;
-	chatClient.say(target, `Tung muss ${clothing[slot].name} bis ${timeStr} tragen. 🤖`);
+	if (clothing[slot].time === null)
+		chatClient.say(target, `Tung muss ${clothing[slot].name} derzeit nicht tragen. 🤖`);
+	else {
+		const timeStr = `${makeTwoDigit(clothing[slot].time.getHours())}:${makeTwoDigit(clothing[slot].time.getMinutes())}`;
+		chatClient.say(target, `Tung muss ${clothing[slot].name} bis ${timeStr} tragen. 🤖`);
+	}
 }
 
 function updateZwergTimeout(slot, target = targetChannel) {

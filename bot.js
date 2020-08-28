@@ -145,7 +145,7 @@ function onChannelPointHandler(message) {
 		chatClient.say(targetChannel, `/timeout ${message.userName} 120 Kanalbelohnung eingelöst. 🤖 `);
 	} else if (message.rewardId === '6da58703-f497-4483-ac97-45ed011644e9') {
 		waterCount++;
-		chatClient.say(targetChannel, `🚰 Tung hat heute ${waterCount} Schluck Wasser getrunken. Prost! 🤖`);
+		chatClient.say(targetChannel, `🚰 Der Chat hat heute ${waterCount} mal dafür gesorgt, dass Tung genug Wasser trinkt. Prost! 🤖`);
 	}
 }
 

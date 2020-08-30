@@ -108,7 +108,7 @@ function onMessageHandler(target, context, message, self) {
 	} else if (isModerator(context)) {
 		if (lmsg.match('^!(cape|bart|helm)$')) {
 			//manual reward call
-			onZwergReward(text2Slot(lmsg), addTime, target);
+			onZwergReward(text2Slot(lmsg), undefined, target); //undefined -> default time
 		} else if (lmsg === '!rüstung' || lmsg === '!kraft' || lmsg === '!all') {
 			rewardAll(target);
 		} else if (lmsg.match('^!(cape|bart|helm) add -?\\d+$')) {
@@ -125,11 +125,11 @@ function onChannelPointHandler(message) {
 	console.log(`${currentTimeString()} [Redemption] ${message.userDisplayName}: ${message.rewardName} (${message.rewardCost})`);
 
 	if (message.rewardId === '3918cc27-4b68-4cd1-90c2-c7f39165485d') {
-		onZwergReward(CAPE, getTime(CAPE));
+		onZwergReward(CAPE);
 	} else if (message.rewardId === '7485f8d7-d39c-4530-a32e-eb35e3f6d5b9') {
-		onZwergReward(BART, getTime(BART));
+		onZwergReward(BART);
 	} else if (message.rewardId === 'd17a39e8-6a12-4fe9-95dc-25cf20b8f66f') {
-		onZwergReward(HELM, getTime(HELM));
+		onZwergReward(HELM);
 	} else if (message.rewardId === '2e6518e0-eba3-4ace-b219-233d4374f0ab') {
 		rewardAll();
 	} else if (message.rewardId === '1c845b56-5e7d-48b2-82ec-a78a41486fdd') {
@@ -190,7 +190,7 @@ function text2Slot(msg) {
 	}
 }
 
-function onZwergReward(slot, time, target = targetChannel) {
+function onZwergReward(slot, time = getTime(slot), target = targetChannel) {
 	updateTime(slot, time);
 	sendTime(slot, target);
 	updateZwergTimeout(slot, target);

@@ -102,7 +102,7 @@ function onMessageHandler(target, context, message, self) {
 		&& context['user-id'] === '100135110') {
 		chatClient.say(target, 'LUL');
 	} else if (lmsg === '!queue') {
-		chatClient.say(target, 'https://warp.world/streamqueue?streamer=tungdiiltv');
+		say('https://warp.world/streamqueue?streamer=tungdiiltv', target);
 	} else if (lmsg.match('!(cape|bart|helm) time') || (!isModerator(context) && lmsg.match('!(cape|bart|helm)'))) {
 		sendTime(text2Slot(lmsg));
 	} else if (isModerator(context)) {
@@ -142,10 +142,10 @@ function onChannelPointHandler(message) {
 			chatClient.say(targetChannel, '/emoteonlyoff');
 		}, 2 * 60000);
 	} else if (message.rewardId === 'b28d8dc9-adf6-4ab7-b75e-6ae55102d148') {
-		chatClient.say(targetChannel, `/timeout ${message.userName} 120 Kanalbelohnung eingelöst. 🤖 `);
+		say(`/timeout ${message.userName} 120 Kanalbelohnung eingelöst.`);
 	} else if (message.rewardId === '6da58703-f497-4483-ac97-45ed011644e9') {
 		waterCount++;
-		chatClient.say(targetChannel, `🚰 Der Chat hat heute ${waterCount} mal dafür gesorgt, dass Tung genug Wasser trinkt. Prost! 🤖`);
+		say(`🚰 Der Chat hat heute ${waterCount} mal dafür gesorgt, dass Tung genug Wasser trinkt. Prost!`);
 	}
 }
 
@@ -163,13 +163,17 @@ function onHostHandler(channel, username, viewers, autohost) {
 function shoutout(channel, username, viewers) {
 	if (viewers >= 2) {
 		setTimeout(function () {
-			chatClient.say(channel, `!so ${username}`);
+			say(`!so ${username}`);
 		}, 7500);
 	}
 }
 
 function isModerator(context) {
 	return context['mod'] || (context['badges'] !== null && context['badges'].hasOwnProperty('broadcaster'));
+}
+
+function say(message, target = targetChannel) {
+	chatClient.say(target, message + ' 🤖');
 }
 
 function text2Slot(msg) {
@@ -198,10 +202,10 @@ function onZwergReward(slot, time = getTime(slot), target = targetChannel) {
 
 function sendTime(slot, target = targetChannel) {
 	if (clothing[slot].time === null)
-		chatClient.say(target, `Tung muss ${clothing[slot].name} derzeit nicht tragen. 🤖`);
+		say( `Tung muss ${clothing[slot].name} derzeit nicht tragen.`, target);
 	else {
 		const timeStr = `${makeTwoDigit(clothing[slot].time.getHours())}:${makeTwoDigit(clothing[slot].time.getMinutes())}`;
-		chatClient.say(target, `Tung muss ${clothing[slot].name} bis ${timeStr} tragen. 🤖`);
+		say( `Tung muss ${clothing[slot].name} bis ${timeStr} tragen.`, target);
 	}
 }
 
@@ -210,7 +214,7 @@ function updateZwergTimeout(slot, target = targetChannel) {
 		clearTimeout(clothing[slot].handler);
 	}
 	clothing[slot].handler = setTimeout(function () {
-		chatClient.say(target, `Du kannst jetzt ${clothing[slot].name} abnehmen Tung. 🤖`);
+		say( `Du kannst jetzt ${clothing[slot].name} abnehmen Tung.`, target);
 		clothing[slot].time = null;
 		clothing[slot].handler = null;
 	}, clothing[slot].time.getTime() - new Date().getTime());
@@ -221,7 +225,7 @@ function rewardAll(target = targetChannel) {
 		updateTime(i, getTime(i));
 		updateZwergTimeout(i, target);
 	}
-	chatClient.say(target, 'Tung hat die Zwergenrüstung angezogen! CoolCat 🤖');
+	say( 'Tung hat die Zwergenrüstung angezogen! CoolCat', target);
 }
 
 //adds one Minute addition time

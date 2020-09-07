@@ -4,9 +4,9 @@
   "dependencies": {
     "dotenv": "^8.2.0",
     "tmi.js": "^1.5.0",
-    "twitch": "^4.2.0-pre.6",
-    "twitch-auth": "^4.2.0-pre.6",
-    "twitch-pubsub-client": "4.2.0-pre.6"
+    "twitch": "^4.2.0",
+    "twitch-auth": "^4.2.0",
+    "twitch-pubsub-client": "4.2.0"
   },
   "main": "bot.js",
   "description": "Tungs Twitch Chat Bot",

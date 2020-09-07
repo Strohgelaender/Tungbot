@@ -2,6 +2,7 @@ const {ApiClient, RefreshableAuthProvider, StaticAuthProvider} = require('twitch
 const {InvalidTokenError} = require('twitch-auth');
 const {PubSubClient} = require('twitch-pubsub-client');
 const tmi = require('tmi.js');
+const axios = require('axios');
 
 require('dotenv').config();
 
@@ -19,7 +20,9 @@ const authProvider = new RefreshableAuthProvider(
 );
 const apiClient = new ApiClient({authProvider});
 const pubSubClient = new PubSubClient();
+
 const targetChannel = '#tungdiiltv';
+const targetChannelID = '444384436';
 
 const opts = {
 	identity: {
@@ -32,6 +35,14 @@ const opts = {
 	]
 };
 const chatClient = new tmi.client(opts);
+
+const streamelements = axios.create({
+	baseURL: 'https://api.streamelements.com/kappa/v2/',
+	headers: {
+		'Content-Type': 'application/json',
+		'Authorization': 'Bearer ' + process.env.STREAMELEMENTS_TOKEN
+	}
+});
 
 let waterCount = 0; //TODO save value
 
@@ -77,8 +88,7 @@ async function connectChatClient() {
 
 async function connectPubSubClient() {
 	await pubSubClient.registerUserListener(apiClient);
-	//Tung: 444384436
-	await pubSubClient.onRedemption('444384436', onChannelPointHandler);
+	await pubSubClient.onRedemption(targetChannelID, onChannelPointHandler);
 }
 
 function onConnectedHandler(addr, port) {
@@ -105,6 +115,9 @@ function onMessageHandler(target, context, message, self) {
 		say('https://warp.world/streamqueue?streamer=tungdiiltv', target);
 	} else if (lmsg.match('!(cape|bart|helm) time') || (!isModerator(context) && lmsg.match('!(cape|bart|helm)'))) {
 		sendTime(text2Slot(lmsg));
+	} else if (lmsg.match('!top\\d*')) {
+		const num = parseInt(lmsg.substring(4)) || 5;
+		sendTopList(num, target);
 	} else if (isModerator(context)) {
 		if (lmsg.match('^!(cape|bart|helm)$')) {
 			//manual reward call
@@ -133,9 +146,9 @@ function onChannelPointHandler(message) {
 	} else if (message.rewardId === '2e6518e0-eba3-4ace-b219-233d4374f0ab') {
 		rewardAll();
 	} else if (message.rewardId === '1c845b56-5e7d-48b2-82ec-a78a41486fdd') {
-		chatClient.say(targetChannel, `!addpoints ${message.userName} 500 🤖`);
+		addPoints(message.userName, 500);
 	} else if (message.rewardId === 'cfce5fc5-0da5-4078-a905-90a92ffdffd4') {
-		chatClient.say(targetChannel, `!addpoints ${message.userName} 6000 🤖`);
+		addPoints(message.userName, 6000);
 	} else if (message.rewardId === '4134f9e6-aeb6-43fa-a501-5cf3410b7d78') {
 		chatClient.say(targetChannel, '/emoteonly');
 		setTimeout(function () {
@@ -166,6 +179,34 @@ function shoutout(channel, username, viewers) {
 			say(`!so ${username}`);
 		}, 7500);
 	}
+}
+
+function addPoints(user, amount) {
+	streamelements
+		.put(`points/${process.env.STREAMELEMENTS_USER_ID}/${user}/${amount}`)
+		.then(response => {
+			if (response.status === 200) {
+				say( `${user} hat an der Bar ${amount} Bier bestellt und besitzt jetzt ${response.data.newAmount} Bier.`);
+			} else {
+				console.log(response);
+			}
+		}).catch(e => console.log(e));
+}
+
+function sendTopList(limit = 5, target = targetChannel) {
+	streamelements.get(`points/${process.env.STREAMELEMENTS_USER_ID}/top?limit=${limit}`)
+		.then(response => {
+			if (response.status === 200) {
+				let toplist = `Die Top ${limit} Nutzer mit am meisten Bier: `
+				for (let i = 0; i < response.data.users.length; i++) {
+					const user = response.data.users[i];
+					toplist += `${i + 1}: ${user.username} (${user.points}), `;
+				}
+				say(toplist.slice(0, -2));
+			} else {
+				console.log(response);
+			}
+		}).catch(e => console.log(e))
 }
 
 function isModerator(context) {

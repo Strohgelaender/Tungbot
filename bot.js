@@ -116,7 +116,7 @@ function onMessageHandler(target, context, message, self) {
 		say('https://warp.world/streamqueue?streamer=tungdiiltv', target);
 	} else if (lmsg.match('!(cape|bart|helm) time') || (!isModerator(context) && lmsg.match('!(cape|bart|helm)'))) {
 		sendTime(text2Slot(lmsg));
-	} else if (lmsg.match('!top\\d*')) {
+	} else if (lmsg.match('^!top\\d*')) {
 		const num = parseInt(lmsg.substring(4)) || 5;
 		sendTopList(num, target);
 	} else if (isModerator(context)) {

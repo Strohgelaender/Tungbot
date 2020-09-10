@@ -49,7 +49,7 @@ let waterCount = 0; //TODO save value
 
 const addTime = 30 * 60000;
 const CAPE = 0, BART = 1, HELM = 2;
-let clothing = [{
+const clothing = [{
 	name: 'das Cape',
 	handler: null,
 	time: null
@@ -63,6 +63,8 @@ let clothing = [{
 	time: null
 }];
 
+let items;
+
 startup().then(() => console.log('chat client started')).catch(e => {
 	if (e instanceof InvalidTokenError)
 		authProvider.refresh()
@@ -75,6 +77,7 @@ startup().then(() => console.log('chat client started')).catch(e => {
 
 async function startup() {
 	await connectChatClient();
+	setupStreamelementsItems();
 	await connectPubSubClient();
 }
 
@@ -85,6 +88,19 @@ async function connectChatClient() {
 	chatClient.on('hosted', onHostHandler);
 
 	await chatClient.connect();
+}
+
+function setupStreamelementsItems() {
+	streamelements
+		.get(`store/${process.env.STREAMELEMENTS_USER_ID}/items`)
+		.then(response => {
+			if (response.status === 200) {
+				items = response.data;
+				console.log('SE Items downloaded');
+			} else {
+				console.log(response);
+			}
+		}).catch(e => console.log(e));
 }
 
 async function connectPubSubClient() {
@@ -105,6 +121,16 @@ function onMessageHandler(target, context, message, self) {
 
 	if (self) // Ignore messages from the bot
 		return;
+
+	//Streamelements Items
+	if (items) {
+		for (const item of items) {
+			if (lmsg === '!' + item.bot.identifier) {
+				redeemSound(item, context['display-name']);
+				break;
+			}
+		}
+	}
 
 	if (lmsg.includes('tungdoof') && !msg.includes('tungdiDoof')) {
 		chatClient.say(target, 'tungdiDoof');
@@ -182,14 +208,16 @@ function shoutout(channel, username, viewers) {
 	}
 }
 
-function addPoints(user, amount) {
-	streamelements
+function addPoints(user, amount, talk = true) {
+	return streamelements
 		.put(`points/${process.env.STREAMELEMENTS_USER_ID}/${user}/${amount}`)
 		.then(response => {
 			if (response.status === 200) {
-				say( `${user} hat an der Bar ${amount} Bier bestellt und besitzt jetzt ${response.data.newAmount} Bier.`);
+				if (talk) {
+					say(`${user} hat an der Bar ${amount} Bier bestellt und besitzt jetzt ${response.data.newAmount} Bier.`);
+				}
 			} else {
-				console.log(response);
+				console.log(response.data);
 			}
 		}).catch(e => console.log(e));
 }
@@ -205,9 +233,41 @@ function sendTopList(limit = 5, target = targetChannel) {
 				}
 				say(toplist.slice(0, -2));
 			} else {
-				console.log(response);
+				console.log(response.data);
 			}
 		}).catch(e => console.log(e))
+}
+
+function redeemSound(item, user) {
+	//Check if user has enough Points
+	streamelements
+		.get(`points/${process.env.STREAMELEMENTS_USER_ID}/${user}`)
+		.then(response => {
+			if (response.status === 200) {
+				if (response.data.points >= item.cost) {
+					//Add Ponts to Tung Account
+					addPoints('tungdiiltv', item.cost, false)
+						.then(() => {
+							//Redeem Sound
+							streamelements
+								.post(`store/${process.env.STREAMELEMENTS_USER_ID}/redemptions/${item._id}`)
+								.then(response => {
+									if (response.status === 200) {
+										console.log(`Redemption ${item.name} complete`);
+									} else {
+										console.log(response.data);
+									}
+								}).catch(e => console.log(e));
+						});
+					//Remove Points from User
+					addPoints(user, -item.cost, false);
+				} else {
+					say(`Leider hast du nicht genug Bier für diesen Command ${user} sicuiCry Du brauchst mindestens ${item.cost} Bier.`);
+				}
+			} else {
+				console.log(response.data);
+			}
+		}).catch(e => console.log(e));
 }
 
 function isModerator(context) {

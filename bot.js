@@ -29,6 +29,7 @@ const opts = {
 		username: process.env.CHAT_USERNAME,
 		password: process.env.CHAT_OAUTH_TOKEN
 	},
+	connection: {cluster: 'aws', timeout: 2000, reconnect: true},
 	channels: [
 		targetChannel,
 		'strohgelaender' //debug channel

@@ -212,12 +212,12 @@ function addPoints(user, amount, talk = true) {
 	return streamelements
 		.put(`points/${process.env.STREAMELEMENTS_USER_ID}/${user}/${amount}`)
 		.then(response => {
-			if (response.status === 200) {
-				if (talk) {
-					say(`${user} hat an der Bar ${amount} Bier bestellt und besitzt jetzt ${response.data.newAmount} Bier.`);
-				}
-			} else {
+			if (response.status !== 200) {
 				console.log(response.data);
+				return;
+			}
+			if (talk) {
+				say(`${user} hat an der Bar ${amount} Bier bestellt und besitzt jetzt ${response.data.newAmount} Bier.`);
 			}
 		}).catch(e => console.log(e));
 }
@@ -225,16 +225,16 @@ function addPoints(user, amount, talk = true) {
 function sendTopList(limit = 5, target = targetChannel) {
 	streamelements.get(`points/${process.env.STREAMELEMENTS_USER_ID}/top?limit=${limit}`)
 		.then(response => {
-			if (response.status === 200) {
-				let toplist = `Die Top ${limit} Nutzer mit am meisten Bier: `
-				for (let i = 0; i < response.data.users.length; i++) {
-					const user = response.data.users[i];
-					toplist += `${i + 1}: ${user.username} (${user.points}), `;
-				}
-				say(toplist.slice(0, -2));
-			} else {
+			if (response.status !== 200) {
 				console.log(response.data);
+				return;
 			}
+			let toplist = `Die Top ${limit} Nutzer mit am meisten Bier: `
+			for (let i = 0; i < response.data.users.length; i++) {
+				const user = response.data.users[i];
+				toplist += `${i + 1}: ${user.username} (${user.points}), `;
+			}
+			say(toplist.slice(0, -2));
 		}).catch(e => console.log(e))
 }
 
@@ -243,29 +243,28 @@ function redeemSound(item, user) {
 	streamelements
 		.get(`points/${process.env.STREAMELEMENTS_USER_ID}/${user}`)
 		.then(response => {
-			if (response.status === 200) {
-				if (response.data.points >= item.cost) {
-					//Add Ponts to Tung Account
-					addPoints('tungdiiltv', item.cost, false)
-						.then(() => {
-							//Redeem Sound
-							streamelements
-								.post(`store/${process.env.STREAMELEMENTS_USER_ID}/redemptions/${item._id}`)
-								.then(response => {
-									if (response.status === 200) {
-										console.log(`Redemption ${item.name} complete`);
-									} else {
-										console.log(response.data);
-									}
-								}).catch(e => console.log(e));
-						});
-					//Remove Points from User
-					addPoints(user, -item.cost, false);
-				} else {
-					say(`Leider hast du nicht genug Bier für diesen Command ${user} sicuiCry Du brauchst mindestens ${item.cost} Bier.`);
-				}
-			} else {
+			if (response.status !== 200) {
 				console.log(response.data);
+				return;
+			}
+			if (response.data.points >= item.cost) {
+				//Add Ponts to Tung Account
+				addPoints('tungdiiltv', item.cost, false)
+					.then(() => {
+						//Redeem Sound
+						streamelements
+							.post(`store/${process.env.STREAMELEMENTS_USER_ID}/redemptions/${item._id}`)
+							.then(response => {
+								if (response.status === 200) {
+									//Remove Points from User
+									addPoints(user, -item.cost, false);
+								} else {
+									console.log(response.data);
+								}
+							}).catch(e => console.log(e));
+					});
+			} else {
+				say(`Leider hast du nicht genug Bier für diesen Command ${user} sicuiCry Du brauchst mindestens ${item.cost} Bier.`);
 			}
 		}).catch(e => console.log(e));
 }
@@ -304,10 +303,10 @@ function onZwergReward(slot, time = getTime(slot), target = targetChannel) {
 
 function sendTime(slot, target = targetChannel) {
 	if (clothing[slot].time === null)
-		say( `Tung muss ${clothing[slot].name} derzeit nicht tragen.`, target);
+		say(`Tung muss ${clothing[slot].name} derzeit nicht tragen.`, target);
 	else {
 		const timeStr = `${makeTwoDigit(clothing[slot].time.getHours())}:${makeTwoDigit(clothing[slot].time.getMinutes())}`;
-		say( `Tung muss ${clothing[slot].name} bis ${timeStr} tragen.`, target);
+		say(`Tung muss ${clothing[slot].name} bis ${timeStr} tragen.`, target);
 	}
 }
 
@@ -316,7 +315,7 @@ function updateZwergTimeout(slot, target = targetChannel) {
 		clearTimeout(clothing[slot].handler);
 	}
 	clothing[slot].handler = setTimeout(function () {
-		say( `Du kannst jetzt ${clothing[slot].name} abnehmen Tung.`, target);
+		say(`Du kannst jetzt ${clothing[slot].name} abnehmen Tung.`, target);
 		clothing[slot].time = null;
 		clothing[slot].handler = null;
 	}, clothing[slot].time.getTime() - new Date().getTime());
@@ -327,7 +326,7 @@ function rewardAll(target = targetChannel) {
 		updateTime(i, getTime(i));
 		updateZwergTimeout(i, target);
 	}
-	say( 'Tung hat die Zwergenrüstung angezogen! CoolCat', target);
+	say('Tung hat die Zwergenrüstung angezogen! CoolCat', target);
 }
 
 //adds one Minute addition time

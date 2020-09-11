@@ -247,25 +247,26 @@ function redeemSound(item, user) {
 				console.log(response.data);
 				return;
 			}
-			if (response.data.points >= item.cost) {
-				//Add Ponts to Tung Account
-				addPoints('tungdiiltv', item.cost, false)
-					.then(() => {
-						//Redeem Sound
-						streamelements
-							.post(`store/${process.env.STREAMELEMENTS_USER_ID}/redemptions/${item._id}`)
-							.then(response => {
-								if (response.status === 200) {
-									//Remove Points from User
-									addPoints(user, -item.cost, false);
-								} else {
-									console.log(response.data);
-								}
-							}).catch(e => console.log(e));
-					});
-			} else {
+			if (response.data.points < item.cost) {
 				say(`Leider hast du nicht genug Bier für diesen Command ${user} sicuiCry Du brauchst mindestens ${item.cost} Bier.`);
+				return;
 			}
+			//Add Ponts to Tung Account
+			addPoints('tungdiiltv', item.cost, false)
+				.then(() => {
+					//Redeem Sound
+					streamelements
+						.post(`store/${process.env.STREAMELEMENTS_USER_ID}/redemptions/${item._id}`)
+						.then(response => {
+							if (response.status === 200) {
+								console.log(`Played Sound ${item.name}`);
+								//Remove Points from User
+								addPoints(user, -item.cost, false);
+							} else {
+								console.log(response.data);
+							}
+						}).catch(e => console.log(e));
+				});
 		}).catch(e => console.log(e));
 }
 

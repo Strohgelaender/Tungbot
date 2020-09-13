@@ -31,6 +31,7 @@ async function startup() {
 	chatClient.on('message', onMessageHandler);
 	chatClient.on('raided', onRaidHandler);
 	chatClient.on('hosted', onHostHandler);
+	se.setChannelName('tungdiiltv');
 	await pubSubClient.onRedemption(targetChannelID, onChannelPointHandler);
 }
 

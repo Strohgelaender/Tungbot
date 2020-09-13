@@ -65,15 +65,21 @@ const clothing = [{
 
 let items;
 
-startup().then(() => console.log('chat client started')).catch(e => {
-	if (e instanceof InvalidTokenError)
-		authProvider.refresh()
-			.then(() => connectPubSubClient())
-			.then(() => console.log('chat client started after refresh'))
-			.catch(e => console.error('startup failed', e));
-	else
-		console.error('startup failed', e);
-});
+module.exports = run;
+//run();
+
+function run() {
+	startup().then(() => console.log('chat client started')).catch(e => {
+		if (e instanceof InvalidTokenError)
+			authProvider.refresh()
+				.then(() => connectPubSubClient())
+				.then(() => console.log('chat client started after refresh'))
+				.catch(e => console.error('startup failed', e));
+		else
+			console.error('startup failed', e);
+	});
+}
+
 
 async function startup() {
 	await connectChatClient();

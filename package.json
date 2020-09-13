@@ -10,6 +10,7 @@
     "twitch-pubsub-client": "4.2.0"
   },
   "main": "bot.js",
+  "bin": "bin.js",
   "description": "Tungs Twitch Chat Bot",
   "repository": {
     "url": "https://github.com/Strohgelaender/Tungbot"

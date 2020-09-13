@@ -6,8 +6,6 @@ let items;
 let pointsName;
 let channelName;
 
-//TODO dynamic points name
-
 const streamelements = axios.create({
 	baseURL: 'https://api.streamelements.com/kappa/v2/',
 	headers: {
@@ -19,20 +17,24 @@ const streamelements = axios.create({
 exports.setChannelName = name => channelName = name;
 
 async function downloadStreamelementsItems() {
-	let response = await streamelements.get(`store/${process.env.STREAMELEMENTS_USER_ID}/items`);
-	if (response.status !== 200) {
-		console.log(response.data);
-		return;
-	}
-	items = response.data;
-	console.log('SE Items downloaded');
+	try {
+		let response = await streamelements.get(`store/${process.env.STREAMELEMENTS_USER_ID}/items`);
+		if (response.status !== 200) {
+			console.log(response.data);
+			return;
+		}
+		items = response.data;
+		console.log('SE Items downloaded');
 
-	response = await streamelements.get(`loyalty/${process.env.STREAMELEMENTS_USER_ID}`);
-	if (response.status !== 200) {
-		console.log(response.data);
-		return;
+		response = await streamelements.get(`loyalty/${process.env.STREAMELEMENTS_USER_ID}`);
+		if (response.status !== 200) {
+			console.log(response.data);
+			return;
+		}
+		pointsName = response.data.loyalty.name;
+	} catch (e) {
+		console.error('Streamelements Setup failed', e.response.data);
 	}
-	pointsName = response.data.loyalty.name;
 }
 
 function onMessageHandler(target, context, message, self) {
@@ -65,39 +67,47 @@ async function addPoints(user, amount) {
 }
 
 async function getTopList(limit = 5) {
-	const response = await streamelements.get(`points/${process.env.STREAMELEMENTS_USER_ID}/top?limit=${limit}`);
-	if (response.status !== 200) {
-		console.log(response.data);
-		return;
+	try {
+		const response = await streamelements.get(`points/${process.env.STREAMELEMENTS_USER_ID}/top?limit=${limit}`);
+		if (response.status !== 200) {
+			console.log(response.data);
+			return;
+		}
+		let toplist = `Die Top ${limit} Nutzer mit am meisten ${pointsName}: `
+		for (let i = 0; i < response.data.users.length; i++) {
+			const user = response.data.users[i];
+			toplist += `${i + 1}: ${user.username} (${user.points}), `;
+		}
+		return toplist.slice(0, -2);
+	} catch (e) {
+		console.error(e.response.data);
 	}
-	let toplist = `Die Top ${limit} Nutzer mit am meisten ${pointsName}: `
-	for (let i = 0; i < response.data.users.length; i++) {
-		const user = response.data.users[i];
-		toplist += `${i + 1}: ${user.username} (${user.points}), `;
-	}
-	return toplist.slice(0, -2);
 }
 
 async function redeemSound(item, user) {
-	//Check if user has enough Points
-	let response = await streamelements.get(`points/${process.env.STREAMELEMENTS_USER_ID}/${user}`);
-	if (response.status !== 200) {
-		console.log(response.data);
-		return;
-	}
-	if (response.data.points < item.cost) {
-		return `Leider hast du nicht genug ${pointsName} für diesen Command ${user} sicuiCry Du brauchst mindestens ${item.cost} ${pointsName}.`;
-	}
-	//Add Ponts to Owner Account
-	await addPoints(channelName, item.cost, false);
-	//Redeem Sound
-	response = await streamelements.post(`store/${process.env.STREAMELEMENTS_USER_ID}/redemptions/${item._id}`);
-	if (response.status === 200) {
-		console.log(`Played Sound ${item.name}`);
-		//Remove Points from User
-		await addPoints(user, -item.cost, false);
-	} else {
-		console.log(response.data);
+	try {
+		//Check if user has enough Points
+		let response = await streamelements.get(`points/${process.env.STREAMELEMENTS_USER_ID}/${user}`);
+		if (response.status !== 200) {
+			console.log(response.data);
+			return;
+		}
+		if (response.data.points < item.cost) {
+			return `Leider hast du nicht genug ${pointsName} für diesen Command ${user} sicuiCry Du brauchst mindestens ${item.cost} ${pointsName}.`;
+		}
+		//Add Ponts to Owner Account
+		await addPoints(channelName, item.cost, false);
+		//Redeem Sound
+		response = await streamelements.post(`store/${process.env.STREAMELEMENTS_USER_ID}/redemptions/${item._id}`);
+		if (response.status === 200) {
+			console.log(`Played Sound ${item.name}`);
+			//Remove Points from User
+			await addPoints(user, -item.cost, false);
+		} else {
+			console.log(response.data);
+		}
+	} catch (e) {
+		console.error(e.response.data);
 	}
 }
 

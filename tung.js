@@ -91,12 +91,12 @@ function onChannelPointHandler(message) {
 			.then(response => {
 				if (response)
 					say(response);
-			}).catch(e => console.error(e));
+			}).catch(e => console.error(e.response.data));
 	} else if (message.rewardId === 'cfce5fc5-0da5-4078-a905-90a92ffdffd4') {
 		se.addPoints(message.userName, 6000).then(response => {
 			if (response)
 				say(response);
-		}).catch(e => console.error(e));
+		}).catch(e => console.error(e.response.data));
 	} else if (message.rewardId === '4134f9e6-aeb6-43fa-a501-5cf3410b7d78') {
 		chatClient.say(targetChannel, '/emoteonly');
 		setTimeout(function () {

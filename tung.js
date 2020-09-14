@@ -87,11 +87,10 @@ function onChannelPointHandler(message) {
 	} else if (message.rewardId === '2e6518e0-eba3-4ace-b219-233d4374f0ab') {
 		rewardAll();
 	} else if (message.rewardId === '1c845b56-5e7d-48b2-82ec-a78a41486fdd') {
-		se.addPoints(message.userName, 500)
-			.then(response => {
-				if (response)
-					say(response);
-			}).catch(e => console.error(e.response.data));
+		se.addPoints(message.userName, 500).then(response => {
+			if (response)
+				say(response);
+		}).catch(e => console.error(e.response.data));
 	} else if (message.rewardId === 'cfce5fc5-0da5-4078-a905-90a92ffdffd4') {
 		se.addPoints(message.userName, 6000).then(response => {
 			if (response)

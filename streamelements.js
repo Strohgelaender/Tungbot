@@ -47,7 +47,7 @@ function onMessageHandler(target, context, message, self) {
 	if (items) {
 		for (const item of items) {
 			if (lmsg === '!' + item.bot.identifier.toLowerCase()) {
-				redeemSound(item, context['display-name']).then(answer => {
+				redeemSound(item, context['username']).then(answer => {
 					if (answer)
 						say(answer);
 				});
@@ -96,13 +96,15 @@ async function redeemSound(item, user) {
 			return `Leider hast du nicht genug ${pointsName} für diesen Command ${user} sicuiCry Du brauchst mindestens ${item.cost} ${pointsName}.`;
 		}
 		//Add Ponts to Owner Account
-		await addPoints(channelName, item.cost, false);
+		await addPoints(channelName, item.cost);
 		//Redeem Sound
 		response = await streamelements.post(`store/${process.env.STREAMELEMENTS_USER_ID}/redemptions/${item._id}`);
 		if (response.status === 200) {
 			console.log(`Played Sound ${item.name}`);
-			//Remove Points from User
-			await addPoints(user, -item.cost, false);
+			if (user !== channelName) {
+				//Remove Points from User
+				await addPoints(user, -item.cost);
+			}
 		} else {
 			console.log(response.data);
 		}

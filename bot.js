@@ -3,6 +3,7 @@ const {InvalidTokenError} = require('twitch-auth');
 const {PubSubClient} = require('twitch-pubsub-client');
 const tmi = require('tmi.js');
 const se = require("./streamelements");
+const {currentTimeString} = require("./util");
 
 require('dotenv').config();
 
@@ -80,25 +81,7 @@ function onMessageHandler(target, context, message, self) {
 	console.log(`${currentTimeString()} ${context['display-name']}: ${msg}`);
 }
 
-function isModerator(context) {
-	return context['mod'] || (context['badges'] !== null && context['badges'].hasOwnProperty('broadcaster'));
-}
-exports.isModerator = isModerator;
-
 function say(message, target = targetChannel) {
 	chatClient.say(target, message + ' 🤖');
 }
 exports.say = say;
-
-function currentTimeString() {
-	const date = new Date();
-	return `${makeTwoDigit(date.getHours())}:${makeTwoDigit(date.getMinutes())}:${makeTwoDigit(date.getSeconds())}`;
-}
-exports.currentTimeString = currentTimeString;
-
-function makeTwoDigit(value) {
-	if (value < 10)
-		return '0' + value;
-	return '' + value;
-}
-exports.makeTwoDigit = makeTwoDigit;

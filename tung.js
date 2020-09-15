@@ -1,6 +1,8 @@
 const se = require('./streamelements');
 const seSocket = require('./streamelementsWebSocket');
-const {say, run, chatClient, pubSubClient, currentTimeString, isModerator, makeTwoDigit} = require("./bot");
+const {say, run, chatClient, pubSubClient} = require("./bot");
+const greeting = require('./greeting');
+const {makeTwoDigit, isModerator, currentTimeString} = require("./util");
 
 const targetChannel = '#tungdiiltv';
 const targetChannelID = '444384436';

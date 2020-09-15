@@ -32,8 +32,10 @@ async function startup() {
 
 	chatClient.on('message', se.onMessageHandler);
 	chatClient.on('message', onMessageHandler);
+	chatClient.on('message', greeting.onMessageHandler);
 	chatClient.on('raided', onRaidHandler);
 	chatClient.on('hosted', onHostHandler);
+
 	se.setChannelName('tungdiiltv');
 	await pubSubClient.onRedemption(targetChannelID, onChannelPointHandler);
 	await seSocket.setupStreamelementsClient();

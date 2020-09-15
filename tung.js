@@ -1,4 +1,5 @@
 const se = require('./streamelements');
+const seSocket = require('./streamelementsWebSocket');
 const {say, run, chatClient, pubSubClient, currentTimeString, isModerator, makeTwoDigit} = require("./bot");
 
 const targetChannel = '#tungdiiltv';
@@ -33,6 +34,8 @@ async function startup() {
 	chatClient.on('hosted', onHostHandler);
 	se.setChannelName('tungdiiltv');
 	await pubSubClient.onRedemption(targetChannelID, onChannelPointHandler);
+	await seSocket.setupStreamelementsClient();
+	seSocket.onFollow(onFollowHandler);
 }
 
 function onMessageHandler(target, context, message, self) {
@@ -107,6 +110,10 @@ function onChannelPointHandler(message) {
 		waterCount++;
 		say(`🚰 Der Chat hat heute ${waterCount} mal dafür gesorgt, dass Tung genug Wasser trinkt. Prost!`);
 	}
+}
+
+function onFollowHandler(followEvent) {
+	say(`Danke für deinen Follow ${followEvent.username} tungdiHype `);
 }
 
 function onRaidHandler(channel, username, viewers) {

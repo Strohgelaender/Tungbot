@@ -113,9 +113,19 @@ async function redeemSound(item, user) {
 	}
 }
 
+async function getCounterValue(counter) {
+	const response = await streamelements.get(`bot/${process.env.STREAMELEMENTS_USER_ID}/counters/${counter}`);
+	if (response.status !== 200) {
+		console.log(response.data);
+		return;
+	}
+	return response.data.value;
+}
+
 exports.downloadStreamelementsItems = downloadStreamelementsItems;
 exports.onMessageHandler = onMessageHandler;
 exports.addPoints = addPoints;
 exports.getTopList = getTopList;
 exports.redeemSound = redeemSound;
+exports.getCounterValue = getCounterValue;
 

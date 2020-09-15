@@ -1,0 +1,25 @@
+@font-face {
+    font-family: "Trajan";
+    src: url("/fonts/Trajan Pro Regular.ttf");
+}
+
+#counter {
+    font-family: Trajan, "Open Sans", sans-serif;
+    font-size: xx-large;
+    white-space: nowrap;
+    color: white;
+    top: 0;
+}
+
+.image {
+    display: inline;
+}
+
+img {
+    height: 1em;
+}
+
+.texts {
+    display: inline;
+    white-space: nowrap;
+}

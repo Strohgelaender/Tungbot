@@ -47,10 +47,7 @@ function onMessageHandler(target, context, message, self) {
 	if (items) {
 		for (const item of items) {
 			if (lmsg.match(`^!${item.bot.identifier.toLowerCase()}(\\s.*)?$`)) {
-				redeemSound(item, context['username']).then(answer => {
-					if (answer)
-						say(answer);
-				});
+				redeemSound(item, context['username']).then(say);
 				break;
 			}
 		}

@@ -81,7 +81,8 @@ function onMessageHandler(target, context, message, self) {
 	console.log(`${currentTimeString()} ${context['display-name']}: ${msg}`);
 }
 
-function say(message, target = targetChannel) {
-	chatClient.say(target, message + ' 🤖');
+function say(message, appendBot = true, target = targetChannel) {
+	if (message)
+		chatClient.say(target, message + (appendBot ? ' 🤖' : ''));
 }
 exports.say = say;

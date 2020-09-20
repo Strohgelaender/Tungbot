@@ -2,25 +2,29 @@ const se = require('./streamelements');
 const seSocket = require('./streamelementsWebSocket');
 const {say, run, chatClient, pubSubClient} = require("./bot");
 const greeting = require('./greeting');
-const {makeTwoDigit, isModerator, currentTimeString} = require("./util");
+const {makeTwoDigit, isModerator, currentTimeString, createClothingTimer} = require("./util");
+const timerManager = require('./timerManager');
+const {Timer} = require('./timer');
 
 const targetChannel = '#tungdiiltv';
 const targetChannelID = '444384436';
 
 const addTime = 30 * 60000;
-const CAPE = 0, BART = 1, HELM = 2;
-const clothing = [{
+const timerData = [{
 	name: 'das Cape',
-	handler: null,
-	time: null
+	command: 'cape',
+	rewardId: '3918cc27-4b68-4cd1-90c2-c7f39165485d',
+	timer: null
 }, {
 	name: 'den Bart',
-	handler: null,
-	time: null
+	command: 'bart',
+	rewardId: '7485f8d7-d39c-4530-a32e-eb35e3f6d5b9',
+	timer: null
 }, {
 	name: 'den Helm',
-	handler: null,
-	time: null
+	command: 'helm',
+	rewardId: 'd17a39e8-6a12-4fe9-95dc-25cf20b8f66f',
+	timer: null
 }];
 
 let waterCount = 0; //TODO save value
@@ -32,14 +36,25 @@ async function startup() {
 
 	chatClient.on('message', se.onMessageHandler);
 	chatClient.on('message', onMessageHandler);
+	chatClient.on('message', timerManager.onMessageHandler);
 	chatClient.on('message', greeting.onMessageHandler);
 	chatClient.on('raided', onRaidHandler);
 	chatClient.on('hosted', onHostHandler);
 
 	se.setChannelName('tungdiiltv');
+
+	setupTimers();
 	await pubSubClient.onRedemption(targetChannelID, onChannelPointHandler);
-	await seSocket.setupStreamelementsClient();
-	seSocket.onFollow(onFollowHandler);
+	await pubSubClient.onRedemption(targetChannelID, timerManager.onChannelPointHandler);
+}
+
+function setupTimers() {
+	for (const data of timerData) {
+		const timer = createClothingTimer(addTime, data.name, 'Tung');
+		timerManager.registerTimer(timer, data.command, data.rewardId);
+		data.timer = timer;
+	}
+	timerManager.registerTimer(new Timer(2 * 60000, '/emoteonly', '/emoteonlyoff', null, false, false), null, '4134f9e6-aeb6-43fa-a501-5cf3410b7d78');
 }
 
 function onMessageHandler(target, context, message, self) {
@@ -56,27 +71,13 @@ function onMessageHandler(target, context, message, self) {
 		&& context['user-id'] === '100135110') {
 		chatClient.say(target, 'LUL');
 	} else if (lmsg === '!queue') {
-		say('https://warp.world/streamqueue?streamer=tungdiiltv', target);
-	} else if (lmsg.match('!(cape|bart|helm) time') || (!isModerator(context) && lmsg.match('!(cape|bart|helm)'))) {
-		sendTime(text2Slot(lmsg));
+		say('https://warp.world/streamqueue?streamer=tungdiiltv', true, target);
 	} else if (lmsg.match('^!top\\d*')) {
 		const num = parseInt(lmsg.substring(4)) || 5;
-		se.getTopList(num, target)
-			.then(topList => {
-				if (topList)
-					say(topList);
-			}).catch(e => console.log(e));
+		se.getTopList(num, target).then(say).catch(e => console.log(e));
 	} else if (isModerator(context)) {
-		if (lmsg.match('^!(cape|bart|helm)$')) {
-			//manual reward call
-			onZwergReward(text2Slot(lmsg), undefined, target); //undefined -> default time
-		} else if (lmsg === '!rüstung' || lmsg === '!kraft' || lmsg === '!all') {
+		if (lmsg === '!rüstung' || lmsg === '!kraft' || lmsg === '!all') {
 			rewardAll(target);
-		} else if (lmsg.match('^!(cape|bart|helm) add -?\\d+$')) {
-			//add / remove time
-			const id = text2Slot(lmsg);
-			const time = parseInt(lmsg.substring(10)) * 60000;
-			onZwergReward(id, time, target);
 		}
 	}
 }
@@ -85,29 +86,12 @@ function onChannelPointHandler(message) {
 	//Log
 	console.log(`${currentTimeString()} [Redemption] ${message.userDisplayName}: ${message.rewardName} (${message.rewardCost})`);
 
-	if (message.rewardId === '3918cc27-4b68-4cd1-90c2-c7f39165485d') {
-		onZwergReward(CAPE);
-	} else if (message.rewardId === '7485f8d7-d39c-4530-a32e-eb35e3f6d5b9') {
-		onZwergReward(BART);
-	} else if (message.rewardId === 'd17a39e8-6a12-4fe9-95dc-25cf20b8f66f') {
-		onZwergReward(HELM);
-	} else if (message.rewardId === '2e6518e0-eba3-4ace-b219-233d4374f0ab') {
+	if (message.rewardId === '2e6518e0-eba3-4ace-b219-233d4374f0ab') {
 		rewardAll();
 	} else if (message.rewardId === '1c845b56-5e7d-48b2-82ec-a78a41486fdd') {
-		se.addPoints(message.userName, 500).then(response => {
-			if (response)
-				say(response);
-		}).catch(e => console.error(e.response.data));
+		se.addPoints(message.userName, 500).then(say).catch(e => console.error(e.response.data));
 	} else if (message.rewardId === 'cfce5fc5-0da5-4078-a905-90a92ffdffd4') {
-		se.addPoints(message.userName, 6000).then(response => {
-			if (response)
-				say(response);
-		}).catch(e => console.error(e.response.data));
-	} else if (message.rewardId === '4134f9e6-aeb6-43fa-a501-5cf3410b7d78') {
-		chatClient.say(targetChannel, '/emoteonly');
-		setTimeout(function () {
-			chatClient.say(targetChannel, '/emoteonlyoff');
-		}, 2 * 60000);
+		se.addPoints(message.userName, 6000).then(say).catch(e => console.error(e.response.data));
 	} else if (message.rewardId === 'b28d8dc9-adf6-4ab7-b75e-6ae55102d148') {
 		say(`/timeout ${message.userName} 120 Kanalbelohnung eingelöst.`);
 	} else if (message.rewardId === '6da58703-f497-4483-ac97-45ed011644e9') {
@@ -137,69 +121,9 @@ function shoutout(channel, username, viewers) {
 	}
 }
 
-function text2Slot(msg) {
-	if (msg.length < 5)
-		return -1;
-	else if (msg.length > 5)
-		msg = msg.substring(0, 5);
-
-	switch (msg) {
-		case '!cape':
-			return CAPE;
-		case '!bart':
-			return BART;
-		case '!helm':
-			return HELM;
-		default:
-			return -1;
+function rewardAll() {
+	for (const data of timerData) {
+		data.timer.reward(true, false);
 	}
-}
-
-function onZwergReward(slot, time = getTime(slot), target = targetChannel) {
-	updateTime(slot, time);
-	sendTime(slot, target);
-	updateZwergTimeout(slot, target);
-}
-
-function sendTime(slot, target = targetChannel) {
-	if (clothing[slot].time === null)
-		say(`Tung muss ${clothing[slot].name} derzeit nicht tragen.`, target);
-	else {
-		const timeStr = `${makeTwoDigit(clothing[slot].time.getHours())}:${makeTwoDigit(clothing[slot].time.getMinutes())}`;
-		say(`Tung muss ${clothing[slot].name} bis ${timeStr} tragen.`, target);
-	}
-}
-
-function updateZwergTimeout(slot, target = targetChannel) {
-	if (clothing[slot].handler !== null) {
-		clearTimeout(clothing[slot].handler);
-	}
-	clothing[slot].handler = setTimeout(function () {
-		say(`Du kannst jetzt ${clothing[slot].name} abnehmen Tung.`, target);
-		clothing[slot].time = null;
-		clothing[slot].handler = null;
-	}, clothing[slot].time.getTime() - new Date().getTime());
-}
-
-function rewardAll(target = targetChannel) {
-	for (let i = 0; i < 3; i++) {
-		updateTime(i, getTime(i));
-		updateZwergTimeout(i, target);
-	}
-	say('Tung hat die Zwergenrüstung angezogen! CoolCat', target);
-}
-
-//adds one Minute addition time
-//if the clothes are not being worn currently.
-function getTime(slot) {
-	if (clothing[slot].time === null)
-		return addTime + 60000;
-	return addTime;
-}
-
-function updateTime(slot, time = addTime) {
-	if (clothing[slot].time === null)
-		clothing[slot].time = new Date(new Date().getTime() + time);
-	else
-		clothing[slot].time = new Date(clothing[slot].time.getTime() + time);
+	say('Tung hat die Zwergenrüstung angezogen! CoolCat');
 }

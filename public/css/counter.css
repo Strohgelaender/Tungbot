@@ -1,0 +1,17 @@
+#counter {
+    font-size: xx-large;
+    white-space: nowrap;
+    color: white;
+    -webkit-text-stroke-color: black;
+}
+
+.image {
+    position: static;
+    display: inline;
+}
+
+.texts {
+    position: relative;
+    display: inline;
+    white-space: nowrap;
+}

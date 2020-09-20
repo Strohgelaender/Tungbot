@@ -24,7 +24,7 @@ app.get('/deaths', (req, res) => {
 
 //TODO use template engine
 app.get('/wins', (req, res) => {
-
+	res.redirect('/html/wins.html');
 });
 
 app.get('/init', async function(req, res) {

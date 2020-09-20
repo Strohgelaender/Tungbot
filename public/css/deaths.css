@@ -5,21 +5,9 @@
 
 #counter {
     font-family: Trajan, "Open Sans", sans-serif;
-    font-size: xx-large;
-    white-space: nowrap;
-    color: white;
-    top: 0;
-}
-
-.image {
-    display: inline;
+    -webkit-text-stroke-width: 0.5px;
 }
 
 img {
     height: 1em;
-}
-
-.texts {
-    display: inline;
-    white-space: nowrap;
 }

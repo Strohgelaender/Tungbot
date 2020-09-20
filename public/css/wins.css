@@ -1,0 +1,19 @@
+@font-face {
+    font-family: "Titan";
+    src: url("/fonts/TitanOne-Regular.ttf");
+}
+
+#counter {
+    font-family: Titan, "Open Sans", sans-serif;
+    -webkit-text-stroke-width: 1px;
+}
+
+img {
+    height: 2em;
+}
+
+.texts {
+    position: absolute;
+    top: 15px;
+    left: 42px;
+}

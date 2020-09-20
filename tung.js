@@ -74,7 +74,7 @@ function onMessageHandler(target, context, message, self) {
 		chatClient.say(target, 'LUL');
 	} else if (lmsg === '!queue') {
 		say('https://warp.world/streamqueue?streamer=tungdiiltv', true, target);
-	} else if (lmsg.match('^!top\\d*')) {
+	} else if (lmsg.match('^!top\\d*$')) {
 		const num = parseInt(lmsg.substring(4)) || 5;
 		se.getTopList(num, target).then(say).catch(e => console.log(e));
 	} else if (isModerator(context)) {

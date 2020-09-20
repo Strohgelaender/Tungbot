@@ -29,7 +29,7 @@ const timerData = [{
 
 let waterCount = 0; //TODO save value
 
-startup();
+startup().then(() => console.log('setup finished')).catch(e => console.error(e));
 
 async function startup() {
 	await run(targetChannel, true);
@@ -42,6 +42,8 @@ async function startup() {
 	chatClient.on('hosted', onHostHandler);
 
 	se.setChannelName('tungdiiltv');
+	await seSocket.setupStreamelementsClient();
+	seSocket.onFollow(onFollowHandler);
 
 	setupTimers();
 	await pubSubClient.onRedemption(targetChannelID, onChannelPointHandler);

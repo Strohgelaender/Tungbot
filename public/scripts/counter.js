@@ -5,14 +5,9 @@ let counterValue;
 
 function setupCounter(counter) {
 	//Load initial Counter value
-	$.ajax({
-		method: "GET",
-		url: `/init?counter=${counter}`
-	}).done(value => {
-		updateCounter(value);
-	}).catch(error => {
-		console.log(error);
-	});
+	loadCounter(counter);
+	//Fallback
+	setInterval(() => loadCounter(counter), 60000);
 
 	//connect WebSocket
 	const loc = window.location;
@@ -28,6 +23,17 @@ function setupCounter(counter) {
 			updateCounter(msg.value);
 		}
 	};
+}
+
+function loadCounter(counter) {
+	$.ajax({
+		method: "GET",
+		url: `/init?counter=${counter}`
+	}).done(value => {
+		updateCounter(value);
+	}).catch(error => {
+		console.log(error);
+	});
 }
 
 function updateCounter(value) {

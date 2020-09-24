@@ -17,7 +17,7 @@ const streamelements = axios.create({
 
 exports.setChannelName = name => channelName = name;
 
-async function downloadStreamelementsItems() {
+exports.downloadStreamelementsItems = async () => {
 	try {
 		let response = await streamelements.get(`store/${process.env.STREAMELEMENTS_USER_ID}/items`);
 		if (response.status !== 200) {
@@ -38,7 +38,7 @@ async function downloadStreamelementsItems() {
 	}
 }
 
-function onMessageHandler(target, user, message) {
+exports.onMessageHandler = (target, user, message) => {
 	const msg = message.trim();
 	const lmsg = msg.toLowerCase();
 
@@ -61,7 +61,7 @@ async function addPoints(user, amount) {
 	return `${user} hat an der Bar ${amount} ${pointsName} bestellt und besitzt jetzt ${response.data.newAmount} ${pointsName}.`;
 }
 
-async function getTopList(limit = 5) {
+exports.getTopList = async (limit = 5) => {
 	try {
 		const response = await streamelements.get(`points/${process.env.STREAMELEMENTS_USER_ID}/top?limit=${limit}`);
 		if (response.status !== 200) {
@@ -108,7 +108,7 @@ async function redeemSound(item, user) {
 	}
 }
 
-async function getCounterValue(counter) {
+exports.getCounterValue = async counter => {
 	const response = await streamelements.get(`bot/${process.env.STREAMELEMENTS_USER_ID}/counters/${counter}`);
 	if (response.status !== 200) {
 		console.log(response.data);
@@ -117,10 +117,6 @@ async function getCounterValue(counter) {
 	return response.data.value;
 }
 
-exports.downloadStreamelementsItems = downloadStreamelementsItems;
-exports.onMessageHandler = onMessageHandler;
 exports.addPoints = addPoints;
-exports.getTopList = getTopList;
 exports.redeemSound = redeemSound;
-exports.getCounterValue = getCounterValue;
 

@@ -10,7 +10,7 @@ const ignoredUsers = ['tungdiiltv', 'nightbot', 'streamelements', 'strohgelaende
 
 const active = false;
 
-function onMessageHandler(target, user, message, context) {
+exports.onMessageHandler = (target, user, message, context) => {
 	if (!active)
 		return;
 
@@ -22,5 +22,3 @@ function onMessageHandler(target, user, message, context) {
 	}
 
 }
-
-exports.onMessageHandler = onMessageHandler;

@@ -28,7 +28,7 @@ exports.getChatClient = () => chatClient;
 
 let targetChannel;
 
-async function run(target, connectPubSub = false) {
+exports.run = async (target, connectPubSub = false) => {
 	targetChannel = '#' + target;
 	const opts = {
 		channels: [target]
@@ -45,7 +45,6 @@ async function run(target, connectPubSub = false) {
 	}
 	console.log('chat client started')
 }
-exports.run = run;
 
 async function startup(connectPubSub) {
 	await connectChatClient();
@@ -79,7 +78,7 @@ function logMessage(user, msg) {
 	console.log(`${currentTimeString()} ${user}: ${msg}`);
 }
 
-function say(message, appendBot = true, target = targetChannel) {
+exports.say = (message, appendBot = true, target = targetChannel) => {
 	if (message) {
 		message += appendBot ? ' 🤖' : '';
 		chatClient.say(target, message);
@@ -87,4 +86,3 @@ function say(message, appendBot = true, target = targetChannel) {
 		logMessage(target, message);
 	}
 }
-exports.say = say;

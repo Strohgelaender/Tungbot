@@ -1,7 +1,7 @@
 const util = require("./util");
 const bot = require("./bot");
 
-class Timer {
+exports.Timer = class Timer {
 	constructor(addTime, startMessage, endMessage, notTimeMessage, calcTime = true, appendBot = true) {
 		this.addTime = addTime;
 		this.startMessage = startMessage;
@@ -64,5 +64,3 @@ class Timer {
 		return addTime;
 	}
 }
-
-exports.Timer = Timer;

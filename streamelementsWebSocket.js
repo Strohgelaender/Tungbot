@@ -21,7 +21,7 @@ let bitsMonthly;
 let bitsWeekly;
 let bitsDaily;
 
-async function setupStreamelementsClient() {
+exports.setupStreamelementsClient = async () => {
 	seSocket.on('connect', () => {
 		console.log('connecting to Streamelements Realtime Service...');
 		seSocket.emit('authenticate', {
@@ -89,7 +89,6 @@ function handleEvent(event, handlers) {
 	}
 }
 
-exports.setupStreamelementsClient = setupStreamelementsClient;
 exports.onCounter = handler => {
 	seSocket.on('bot:counter', handler);
 };

@@ -4,15 +4,16 @@ const {isModerator, checkCommand} = require('./util');
 const timerCommands = new Map();
 const timerRewards = new Map();
 
-function onMessageHandler(target, user, message, context) {
+exports.onMessageHandler = (target, user, message, context) => {
 	const msg = message.trim().toLowerCase();
 
 	for (const [command, timer] of timerCommands) {
 		if (checkCommand(msg, command)) {
 			const args = msg.substring(command.length + 1).trim();
-			if (!isModerator(context) || args.startsWith('time')) {
+			const mod = isModerator(context);
+			if (!mod || args.startsWith('time')) {
 				timer.sendTime();
-			} else if (isModerator(context)) {
+			} else if (mod) {
 				if (args.match('^add -?\\d+$')) {
 					//add / remove time
 					const time = parseInt(args.substring(4)) * 60000;
@@ -26,7 +27,7 @@ function onMessageHandler(target, user, message, context) {
 	}
 }
 
-function onChannelPointHandler(message) {
+exports.onChannelPointHandler = message => {
 	for (const [rewardId, timer] of timerRewards) {
 		if (message.rewardId === rewardId) {
 			timer.reward();
@@ -34,13 +35,9 @@ function onChannelPointHandler(message) {
 	}
 }
 
-function registerTimer(timer, command, rewardId) {
+exports.registerTimer = (timer, command, rewardId) => {
 	if (command)
 		timerCommands.set(command, timer);
 	if (rewardId)
 		timerRewards.set(rewardId, timer);
 }
-
-exports.onMessageHandler = onMessageHandler;
-exports.onChannelPointHandler = onChannelPointHandler;
-exports.registerTimer = registerTimer;

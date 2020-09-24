@@ -7,7 +7,7 @@ function setupCounter(counter) {
 	//Load initial Counter value
 	loadCounter(counter);
 	//Fallback
-	setInterval(() => loadCounter(counter), 60000);
+	setInterval(() => loadCounter(counter), 10 * 60000);
 
 	//connect WebSocket
 	const loc = window.location;

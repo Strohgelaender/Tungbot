@@ -116,8 +116,12 @@ function shoutout(channel, username, viewers) {
 }
 
 function rewardAll() {
+	let message = 'Tung muss';
 	for (const data of timerData) {
-		data.timer.reward(true, false);
+		data.timer.reward(undefined, false);
+		const time = data.timer.getTimeString();
+		message += ` ${data.name} bis ${time},`;
 	}
-	say('Tung hat die Zwergenrüstung angezogen! CoolCat');
+	message = message.slice(0, -1) + ' tragen.';
+	say(message);
 }

@@ -34,9 +34,15 @@ class Timer {
 		if (this.time === null) {
 			bot.say(this.notTimeMessage, this.appendBot);
 		} else {
-			const timeStr = `${util.makeTwoDigit(this.time.getHours())}:${util.makeTwoDigit(this.time.getMinutes())}`;
+			const timeStr = this.getTimeString();
 			bot.say(this.startMessage.replace('<TIME>', timeStr), this.appendBot);
 		}
+	}
+
+	getTimeString() {
+		if (this.time)
+			return `${util.makeTwoDigit(this.time.getHours())}:${util.makeTwoDigit(this.time.getMinutes())}`;
+		return '';
 	}
 
 	updateTimeout() {

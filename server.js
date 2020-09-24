@@ -40,7 +40,7 @@ app.ws('/counter', (ws, req) => {
 });
 
 function updateCounter(counter) {
-	if (counterWs && counterWs.readyState === counterWs.open) {
+	if (counterWs && counterWs.readyState === counterWs.OPEN) {
 		counterWs.send(JSON.stringify(counter));
 	} else {
 		console.log('Websocket not active yet');

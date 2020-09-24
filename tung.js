@@ -1,6 +1,7 @@
 const se = require('./streamelements');
 const seSocket = require('./streamelementsWebSocket');
 const obs = require('./obs');
+const server = require('./server');
 const {say, run, getChatClient, pubSubClient} = require("./bot");
 const greeting = require('./greeting');
 const {makeTwoDigit, isModerator, currentTimeString, createClothingTimer, checkCommand} = require("./util");

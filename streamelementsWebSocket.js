@@ -7,6 +7,8 @@ const seSocket = io('https://realtime.streamelements.com', {
 	transports: ['websocket']
 });
 
+let setupDone = false;
+
 const followHandlers = [];
 const bitHandlers = [];
 
@@ -22,6 +24,10 @@ let bitsWeekly;
 let bitsDaily;
 
 exports.setupStreamelementsClient = async () => {
+	if (setupDone)
+		return;
+
+	setupDone = true;
 	seSocket.on('connect', () => {
 		console.log('connecting to Streamelements Realtime Service...');
 		seSocket.emit('authenticate', {

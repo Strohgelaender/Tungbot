@@ -1,5 +1,6 @@
 const se = require('./streamelements');
 const seSocket = require('./streamelementsWebSocket');
+const obs = require('./obs');
 const {say, run, getChatClient, pubSubClient} = require("./bot");
 const greeting = require('./greeting');
 const {makeTwoDigit, isModerator, currentTimeString, createClothingTimer, checkCommand} = require("./util");
@@ -51,6 +52,8 @@ async function startup() {
 	setupTimers();
 	await pubSubClient.onRedemption(targetChannelID, onChannelPointHandler);
 	await pubSubClient.onRedemption(targetChannelID, timerManager.onChannelPointHandler);
+
+	await obs.connect();
 }
 
 function setupTimers() {
@@ -72,6 +75,10 @@ function onMessageHandler(target, user, message, context) {
 	} else if (isModerator(context)) {
 		if (lmsg === '!rüstung' || lmsg === '!kraft' || lmsg === '!all') {
 			rewardAll(target);
+		} else if (checkCommand(lmsg, 'cam')) {
+			obs.switchScene('Gaming').catch(console.error);
+		} else if (checkCommand(lmsg, 'bigcam')) {
+			obs.switchScene('Gaming - FC Chatting').catch(console.error);
 		}
 	}
 }

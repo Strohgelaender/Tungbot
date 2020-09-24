@@ -13,10 +13,9 @@ class Timer {
 		this.appendBot = appendBot;
 	}
 
-	reward(calcTime = this.calcTime, talk = true) {
-		let addTime = this.addTime;
-		if (calcTime)
-			addTime = this.getTime();
+	reward(addTime = this.addTime, talk = true) {
+		if (this.calcTime)
+			addTime = this.getTime(addTime);
 
 		this.updateTime(addTime);
 		if (talk)
@@ -53,10 +52,10 @@ class Timer {
 
 	//adds one Minute addition time
 	//if the clothes are not being worn currently.
-	getTime() {
+	getTime(addTime) {
 		if (this.time === null)
-			return this.addTime + 60000;
-		return this.addTime;
+			return addTime + 60000;
+		return addTime;
 	}
 }
 

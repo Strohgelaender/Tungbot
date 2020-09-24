@@ -78,8 +78,8 @@ async function setupStreamelementsClient() {
 			packet.data = ["*"].concat(args);
 			onevent.call(this, packet);      // additional call to catch-all
 		};
-		await io.connect();
 	}
+	await io.connect();
 	console.log('SE WebSocket setup finished.');
 }
 

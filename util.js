@@ -34,3 +34,9 @@ function createClothingTimer(time, name, streamerName) {
 }
 
 exports.createClothingTimer = createClothingTimer;
+
+function checkCommand(msg, command) {
+	return msg.match(`^!${command}(\\s.*)?$`);
+}
+
+exports.checkCommand = checkCommand;

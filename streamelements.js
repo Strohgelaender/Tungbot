@@ -1,5 +1,6 @@
 const axios = require('axios');
 const {say} = require("./bot");
+const {checkCommand} = require('./util');
 require('dotenv').config();
 
 let items;
@@ -46,7 +47,7 @@ function onMessageHandler(target, context, message, self) {
 
 	if (items) {
 		for (const item of items) {
-			if (lmsg.match(`^!${item.bot.identifier.toLowerCase()}(\\s.*)?$`)) {
+			if (checkCommand(lmsg, item.bot.identifier.toLowerCase())) {
 				redeemSound(item, context['username']).then(say);
 				break;
 			}

@@ -1,5 +1,5 @@
 const {Timer} = require('./timer');
-const {isModerator} = require('./util');
+const {isModerator, checkCommand} = require('./util');
 
 const timerCommands = new Map();
 const timerRewards = new Map();
@@ -11,7 +11,7 @@ function onMessageHandler(target, context, message, self) {
 	const msg = message.trim().toLowerCase();
 
 	for (const [command, timer] of timerCommands) {
-		if (msg.startsWith('!' + command)) {
+		if (checkCommand(msg, command)) {
 			const args = msg.substring(command.length + 1).trim();
 			if (!isModerator(context) || args.startsWith('time')) {
 				timer.sendTime();

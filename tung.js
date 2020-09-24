@@ -2,7 +2,7 @@ const se = require('./streamelements');
 const seSocket = require('./streamelementsWebSocket');
 const {say, run, chatClient, pubSubClient} = require("./bot");
 const greeting = require('./greeting');
-const {makeTwoDigit, isModerator, currentTimeString, createClothingTimer} = require("./util");
+const {makeTwoDigit, isModerator, currentTimeString, createClothingTimer, checkCommand} = require("./util");
 const timerManager = require('./timerManager');
 const {Timer} = require('./timer');
 
@@ -72,7 +72,7 @@ function onMessageHandler(target, context, message, self) {
 		|| msg.match('.* ist all in gegangen und .* verloren. .*'))
 		&& context['user-id'] === '100135110') {
 		chatClient.say(target, 'LUL');
-	} else if (lmsg === '!queue') {
+	} else if (checkCommand(lmsg, 'queue')) {
 		say('https://warp.world/streamqueue?streamer=tungdiiltv', true, target);
 	} else if (lmsg.match('^!top\\d*$')) {
 		const num = parseInt(lmsg.substring(4)) || 5;

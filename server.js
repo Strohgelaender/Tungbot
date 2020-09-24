@@ -6,7 +6,7 @@ const express = require('express');
 const app = express();
 
 const expressWs = require('express-ws')(app);
-let counterWs;
+const counterWs = [];
 
 const PORT = process.env.PORT || 5000;
 
@@ -27,7 +27,7 @@ app.get('/wins', (req, res) => {
 	res.redirect('/html/wins.html');
 });
 
-app.get('/init', async function(req, res) {
+app.get('/init', async function (req, res) {
 	if (!req.query.counter) {
 		return res.status(400).json('No counter specified');
 	}
@@ -36,14 +36,18 @@ app.get('/init', async function(req, res) {
 });
 
 app.ws('/counter', (ws, req) => {
-	counterWs = ws;
+	counterWs.push(ws);
 });
 
 function updateCounter(counter) {
-	if (counterWs && counterWs.readyState === counterWs.OPEN) {
-		counterWs.send(JSON.stringify(counter));
-	} else {
+	if (counterWs.length === 0) {
 		console.log('Websocket not active yet');
+		return;
+	}
+	for (const ws of counterWs) {
+		if (ws.readyState === ws.OPEN) {
+			ws.send(JSON.stringify(counter));
+		}
 	}
 }
 

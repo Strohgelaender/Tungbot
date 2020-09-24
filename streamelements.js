@@ -38,17 +38,14 @@ async function downloadStreamelementsItems() {
 	}
 }
 
-function onMessageHandler(target, context, message, self) {
-	if (self)
-		return;
-
+function onMessageHandler(target, user, message) {
 	const msg = message.trim();
 	const lmsg = msg.toLowerCase();
 
 	if (items) {
 		for (const item of items) {
 			if (checkCommand(lmsg, item.bot.identifier.toLowerCase())) {
-				redeemSound(item, context['username']).then(say);
+				redeemSound(item, user).then(say);
 				break;
 			}
 		}

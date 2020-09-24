@@ -24,7 +24,7 @@ function makeTwoDigit(value) {
 exports.makeTwoDigit = makeTwoDigit;
 
 function isModerator(context) {
-	return context['mod'] || (context['badges'] !== null && context['badges'].hasOwnProperty('broadcaster'));
+	return context.userInfo.isMod || context.userInfo.isBroadcaster;
 }
 
 exports.isModerator = isModerator;

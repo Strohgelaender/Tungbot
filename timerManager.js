@@ -4,10 +4,7 @@ const {isModerator, checkCommand} = require('./util');
 const timerCommands = new Map();
 const timerRewards = new Map();
 
-function onMessageHandler(target, context, message, self) {
-	if (self)
-		return;
-
+function onMessageHandler(target, user, message, context) {
 	const msg = message.trim().toLowerCase();
 
 	for (const [command, timer] of timerCommands) {

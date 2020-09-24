@@ -1,13 +1,14 @@
 const se = require('./streamelements');
 const seSocket = require('./streamelementsWebSocket');
-const {say, run, chatClient, pubSubClient} = require("./bot");
+const {say, run, getChatClient, pubSubClient} = require("./bot");
 const greeting = require('./greeting');
 const {makeTwoDigit, isModerator, currentTimeString, createClothingTimer, checkCommand} = require("./util");
 const timerManager = require('./timerManager');
 const {Timer} = require('./timer');
 
-const targetChannel = '#tungdiiltv';
+const targetChannel = 'tungdiiltv';
 const targetChannelID = '444384436';
+let chatClient;
 
 const addTime = 30 * 60000;
 const timerData = [{
@@ -34,14 +35,16 @@ startup().then(() => console.log('setup finished')).catch(e => console.error(e))
 async function startup() {
 	await run(targetChannel, true);
 
-	chatClient.on('message', se.onMessageHandler);
-	chatClient.on('message', onMessageHandler);
-	chatClient.on('message', timerManager.onMessageHandler);
-	chatClient.on('message', greeting.onMessageHandler);
-	chatClient.on('raided', onRaidHandler);
-	chatClient.on('hosted', onHostHandler);
+	chatClient = getChatClient();
 
-	se.setChannelName('tungdiiltv');
+	chatClient.onMessage(se.onMessageHandler);
+	chatClient.onMessage(onMessageHandler);
+	chatClient.onMessage(timerManager.onMessageHandler);
+	chatClient.onMessage(greeting.onMessageHandler);
+	chatClient.onRaid(onRaidHandler);
+	chatClient.onHosted(onHostHandler);
+
+	se.setChannelName(targetChannel);
 	await seSocket.setupStreamelementsClient();
 	seSocket.onFollow(onFollowHandler);
 
@@ -59,24 +62,13 @@ function setupTimers() {
 	timerManager.registerTimer(new Timer(2 * 60000, '/emoteonly', '/emoteonlyoff', null, false, false), null, '4134f9e6-aeb6-43fa-a501-5cf3410b7d78');
 }
 
-function onMessageHandler(target, context, message, self) {
+function onMessageHandler(target, user, message, context) {
 	const msg = message.trim();
 	const lmsg = msg.toLowerCase();
 
-	if (self) // Ignore messages from the bot
-		return;
-
-	if (lmsg.includes('tungdoof') && !msg.includes('tungdiDoof')) {
-		chatClient.say(target, 'tungdiDoof');
-	} else if ((msg.match('.* went all in and lost every single one of their \\d* .* LUL')
-		|| msg.match('.* ist all in gegangen und .* verloren. .*'))
-		&& context['user-id'] === '100135110') {
-		chatClient.say(target, 'LUL');
-	} else if (checkCommand(lmsg, 'queue')) {
-		say('https://warp.world/streamqueue?streamer=tungdiiltv', true, target);
-	} else if (lmsg.match('^!top\\d*$')) {
-		const num = parseInt(lmsg.substring(4)) || 5;
-		se.getTopList(num, target).then(say).catch(e => console.log(e));
+	if (lmsg.match('^!top\\s?\\d*$')) {
+		const num = parseInt(lmsg.substring(4).trim()) || 5;
+		se.getTopList(num, target).then(say).catch(console.log);
 	} else if (isModerator(context)) {
 		if (lmsg === '!rüstung' || lmsg === '!kraft' || lmsg === '!all') {
 			rewardAll(target);
@@ -106,12 +98,12 @@ function onFollowHandler(followEvent) {
 	say(`Danke für deinen Follow ${followEvent.username} tungdiHype `);
 }
 
-function onRaidHandler(channel, username, viewers) {
-	console.log(`${currentTimeString()} [Raid] ${username} (${viewers})`)
-	shoutout(channel, username, viewers);
+function onRaidHandler(channel, username, raidInfo) {
+	console.log(`${currentTimeString()} [Raid] ${username} (${raidInfo.viewerCount})`)
+	shoutout(channel, raidInfo.displayName, raidInfo.viewerCount);
 }
 
-function onHostHandler(channel, username, viewers, autohost) {
+function onHostHandler(channel, username, autohost, viewers) {
 	console.log(`${currentTimeString()} [Host] ${username} (${viewers})`);
 	if (!autohost)
 		shoutout(channel, username, viewers);

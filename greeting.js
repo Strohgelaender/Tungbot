@@ -10,16 +10,15 @@ const ignoredUsers = ['tungdiiltv', 'nightbot', 'streamelements', 'strohgelaende
 
 const active = false;
 
-function onMessageHandler(target, context, message, self) {
-	if (self || !active)
+function onMessageHandler(target, user, message, context) {
+	if (!active)
 		return;
 
-	const username = context['username'];
-	if (!ignoredUsers.includes(username) && !greetedUsers.includes(username)) {
-		greetedUsers.push(username);
+	if (!ignoredUsers.includes(user) && !greetedUsers.includes(user)) {
+		greetedUsers.push(user);
 		const greeting = greetings[getRandomInt(0, greetings.length)];
 		const emote = emotes[getRandomInt(0, emotes.length)];
-		say(`${greeting} ${context['display-name']} ${emote} `);
+		say(`${greeting} ${context.userInfo.displayName} ${emote} `);
 	}
 
 }

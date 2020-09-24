@@ -1,7 +1,7 @@
 const {ApiClient, RefreshableAuthProvider, StaticAuthProvider} = require('twitch');
 const {InvalidTokenError} = require('twitch-auth');
 const {PubSubClient} = require('twitch-pubsub-client');
-const tmi = require('tmi.js');
+const { ChatClient } = require('twitch-chat-client');
 const se = require("./streamelements");
 const {currentTimeString} = require("./util");
 
@@ -23,22 +23,17 @@ const apiClient = new ApiClient({authProvider});
 const pubSubClient = new PubSubClient();
 exports.pubSubClient = pubSubClient;
 
-const opts = {
-	identity: {
-		username: process.env.CHAT_USERNAME,
-		password: process.env.CHAT_OAUTH_TOKEN
-	},
-	connection: {timeout: 2000, reconnect: true}
-};
-
-const chatClient = new tmi.client(opts);
-exports.chatClient = chatClient;
+let chatClient;
+exports.getChatClient = () => chatClient;
 
 let targetChannel;
 
 async function run(target, connectPubSub = false) {
-	targetChannel = target;
-	opts.channels = [target];
+	targetChannel = '#' + target;
+	const opts = {
+		channels: [target]
+	};
+	chatClient = new ChatClient(authProvider, opts);
 	try {
 		await startup(connectPubSub);
 	} catch(e) {
@@ -61,28 +56,35 @@ async function startup(connectPubSub) {
 }
 
 async function connectChatClient() {
-	chatClient.on('message', onMessageHandler);
-	chatClient.on('connected', onConnectedHandler);
+	chatClient.onConnect(onConnectedHandler);
 
 	await chatClient.connect();
+
+	chatClient.onMessage(onMessageHandler);
 }
 
 async function connectPubSubClient() {
 	await pubSubClient.registerUserListener(apiClient);
 }
 
-function onConnectedHandler(addr, port) {
-	console.log(`* Connected to ${addr}:${port}`);
+function onConnectedHandler() {
+	console.log('* Connected to Twitch Chat.');
 }
 
-function onMessageHandler(target, context, message, self) {
-	const msg = message.trim();
+function onMessageHandler(target, user, message) {
+	logMessage(user, message.trim());
+}
 
-	console.log(`${currentTimeString()} ${context['display-name']}: ${msg}`);
+function logMessage(user, msg) {
+	console.log(`${currentTimeString()} ${user}: ${msg}`);
 }
 
 function say(message, appendBot = true, target = targetChannel) {
-	if (message)
-		chatClient.say(target, message + (appendBot ? ' 🤖' : ''));
+	if (message) {
+		message += appendBot ? ' 🤖' : '';
+		chatClient.say(target, message);
+		//twitch.js does not pass own messages to the handlers, so it gets logged here
+		logMessage(target, message);
+	}
 }
 exports.say = say;

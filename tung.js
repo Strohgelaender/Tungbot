@@ -1,12 +1,19 @@
 const se = require('./streamelements');
 const seSocket = require('./streamelementsWebSocket');
 const obs = require('./obs');
+const {getCurrentScene, switchScene, setFilterVisibility} = obs;
 const server = require('./server');
 const {say, run, getChatClient, pubSubClient} = require("./bot");
 const greeting = require('./greeting');
 const {makeTwoDigit, isModerator, currentTimeString, createClothingTimer, checkCommand} = require("./util");
 const timerManager = require('./timerManager');
 const {Timer} = require('./timer');
+
+//OBS Scenes
+const GAMING = 'Gaming';
+const GAMING_FC = 'Gaming - FC Chatting';
+const JUST_CHATTING = 'Just Chatting';
+const JUST_CHATTING_SMALL = 'Bildschirm Just Chatting';
 
 const targetChannel = 'tungdiiltv';
 const targetChannelID = '444384436';
@@ -77,9 +84,9 @@ function onMessageHandler(target, user, message, context) {
 		if (lmsg === '!rüstung' || lmsg === '!kraft' || lmsg === '!all') {
 			rewardAll(target);
 		} else if (checkCommand(lmsg, 'cam')) {
-			obs.switchScene('Gaming').catch(console.error);
+			switchCamScene().catch(console.error);
 		} else if (checkCommand(lmsg, 'bigcam')) {
-			obs.switchScene('Gaming - FC Chatting').catch(console.error);
+			switchScene(JUST_CHATTING).catch(console.error);
 		}
 	}
 }
@@ -132,4 +139,16 @@ function rewardAll() {
 	}
 	message = message.slice(0, -1) + ' tragen.';
 	say(message);
+}
+
+async function switchCamScene() {
+	const currentScene = getCurrentScene();
+	if (currentScene === GAMING)
+		await switchScene(GAMING_FC);
+	else if (currentScene === GAMING_FC)
+		await switchScene(GAMING);
+	else if (currentScene === JUST_CHATTING_SMALL)
+		await switchScene(GAMING);
+	else if (currentScene === JUST_CHATTING)
+		await switchScene(JUST_CHATTING_SMALL);
 }

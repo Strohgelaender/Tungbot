@@ -55,7 +55,6 @@ async function startup() {
 
 	se.setChannelName(targetChannel);
 	await seSocket.setupStreamelementsClient();
-	seSocket.onFollow(onFollowHandler);
 
 	setupTimers();
 	await pubSubClient.onRedemption(targetChannelID, onChannelPointHandler);
@@ -107,10 +106,6 @@ function onChannelPointHandler(message) {
 		waterCount++;
 		say(`🚰 Der Chat hat heute ${waterCount} mal dafür gesorgt, dass Tung genug Wasser trinkt. Prost!`);
 	}
-}
-
-function onFollowHandler(followEvent) {
-	say(`Danke für deinen Follow ${followEvent.username} tungdiHype `);
 }
 
 function onRaidHandler(channel, username, raidInfo) {

@@ -1,5 +1,4 @@
 const {ApiClient, RefreshableAuthProvider, StaticAuthProvider} = require('twitch');
-const {InvalidTokenError} = require('twitch-auth');
 const {PubSubClient} = require('twitch-pubsub-client');
 const { ChatClient } = require('twitch-chat-client');
 const se = require("./streamelements");
@@ -7,9 +6,9 @@ const {currentTimeString} = require("./util");
 
 require('dotenv').config();
 
-const scopes = 'channel:read:redemptions user:read:email chat:edit chat:read'
+const scopes = ['channel:read:redemptions', 'user:read:email', 'chat:edit', 'chat:read', 'channel:moderate'];
 const authProvider = new RefreshableAuthProvider(
-	new StaticAuthProvider(process.env.CLIENT_ID, process.env.CHANNEL_OAUTH_TOKEN),
+	new StaticAuthProvider(process.env.CLIENT_ID, process.env.CHANNEL_OAUTH_TOKEN, scopes),
 	{
 		clientSecret: process.env.CLIENT_SECRET,
 		refreshToken: process.env.CHANNEL_REFRESH_TOKEN,
@@ -36,14 +35,14 @@ exports.run = async (target, connectPubSub = false) => {
 	chatClient = new ChatClient(authProvider, opts);
 	try {
 		await startup(connectPubSub);
+		//refresh Token every two hours
+		//workaround for a bug in the authProvider-library
+		setInterval(() => authProvider.refresh(), 2 * 60 * 60 * 1000);
 	} catch(e) {
-		if (connectPubSub && e instanceof InvalidTokenError) {
-			await authProvider.refresh();
-			await connectPubSubClient();
-		} else
 			console.error('startup failed', e);
+			return;
 	}
-	console.log('chat client started')
+	console.log('chat client started');
 }
 
 async function startup(connectPubSub) {

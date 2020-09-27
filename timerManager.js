@@ -1,5 +1,6 @@
-const {Timer} = require('./timer');
-const {isModerator, checkCommand} = require('./util');
+const {say} = require("./bot");
+const {Timer, START, RENEW, END, NOT_TIME} = require('./timer');
+const {isModerator, checkCommand, makeTimeString} = require('./util');
 
 const timerCommands = new Map();
 const timerRewards = new Map();
@@ -41,3 +42,13 @@ exports.registerTimer = (timer, command, rewardId) => {
 	if (rewardId)
 		timerRewards.set(rewardId, timer);
 }
+
+exports.createClothingTimer = (time, name, streamerName) => {
+	const timer = new Timer(time);
+	const timeHandler = time => say(`${streamerName} muss ${name} bis ${makeTimeString(time)} tragen.`);
+	timer.on(START, timeHandler);
+	timer.on(RENEW, timeHandler);
+	timer.on(END, () => say(`Du kannst jetzt ${name} abnehmen ${streamerName}.`));
+	timer.on(NOT_TIME, () => say(`${streamerName} muss ${name} derzeit nicht tragen.`));
+	return timer;
+};

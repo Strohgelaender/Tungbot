@@ -5,9 +5,9 @@ const {getCurrentScene, switchScene, setFilterVisibility} = obs;
 const server = require('./server');
 const {say, run, getChatClient, pubSubClient} = require("./bot");
 const greeting = require('./greeting');
-const {makeTwoDigit, isModerator, currentTimeString, createClothingTimer, checkCommand} = require("./util");
+const {makeTimeString, isModerator, currentTimeString, createClothingTimer, checkCommand} = require("./util");
 const timerManager = require('./timerManager');
-const {Timer} = require('./timer');
+const {Timer, START, END} = require('./timer');
 
 //OBS Scenes
 const GAMING = 'Gaming';
@@ -65,11 +65,15 @@ async function startup() {
 
 function setupTimers() {
 	for (const data of timerData) {
-		const timer = createClothingTimer(addTime, data.name, 'Tung');
+		const timer = timerManager.createClothingTimer(addTime, data.name, 'Tung');
 		timerManager.registerTimer(timer, data.command, data.rewardId);
 		data.timer = timer;
 	}
-	timerManager.registerTimer(new Timer(2 * 60000, '/emoteonly', '/emoteonlyoff', null, false, false), null, '4134f9e6-aeb6-43fa-a501-5cf3410b7d78');
+
+	const emoteTimer = new Timer(2 * 60000, false);
+	emoteTimer.on(START, async () => chatClient.enableEmoteOnly(targetChannel));
+	emoteTimer.on(END, () => chatClient.disableEmoteOnly(targetChannel));
+	timerManager.registerTimer(emoteTimer, null, '4134f9e6-aeb6-43fa-a501-5cf3410b7d78');
 }
 
 function onMessageHandler(target, user, message, context) {
@@ -129,7 +133,7 @@ function rewardAll() {
 	let message = 'Tung muss';
 	for (const data of timerData) {
 		data.timer.reward(undefined, false);
-		const time = data.timer.getTimeString();
+		const time = makeTimeString(data.timer.time);
 		message += ` ${data.name} bis ${time},`;
 	}
 	message = message.slice(0, -1) + ' tragen.';

@@ -1,58 +1,79 @@
-const util = require("./util");
-const bot = require("./bot");
+const START = 'start';
+const RENEW = 'renew';
+const END = 'end';
+const NOT_TIME = 'notTime';
+
+exports.START = START;
+exports.RENEW = RENEW;
+exports.END = END;
+exports.NOT_TIME = NOT_TIME;
 
 exports.Timer = class Timer {
 	constructor(addTime, startMessage, endMessage, notTimeMessage, calcTime = true, appendBot = true) {
 		this.addTime = addTime;
-		this.startMessage = startMessage;
-		this.endMessage = endMessage;
-		this.notTimeMessage = notTimeMessage;
 		this.time = null;
-		this.handler = null;
+		this.timeoutHandler = null;
 		this.calcTime = calcTime;
-		this.appendBot = appendBot;
+	}
+
+	on(event, handler) {
+		switch (event) {
+			case START:
+				this.startHandler = handler;
+				break;
+			case RENEW:
+				this.renewHandler = handler;
+				break;
+			case END:
+				this.endHandler = handler;
+				break;
+			case NOT_TIME:
+				this.notTimeHandler = handler;
+				break;
+		}
 	}
 
 	reward(addTime = this.addTime, talk = true) {
 		if (this.calcTime)
 			addTime = this.getTime(addTime);
 
-		this.updateTime(addTime);
+		const isStart = this.updateTime(addTime);
 		if (talk)
-			this.sendTime();
+			this.sendTime(isStart);
 		this.updateTimeout();
 	}
 
 	updateTime(time = this.addTime) {
-		if (this.time === null)
-			this.time = new Date(new Date().getTime() + time);
-		else
-			this.time = new Date(this.time.getTime() + time);
-	}
-
-	sendTime() {
 		if (this.time === null) {
-			bot.say(this.notTimeMessage, this.appendBot);
+			this.time = new Date(new Date().getTime() + time);
+			return true;
 		} else {
-			const timeStr = this.getTimeString();
-			bot.say(this.startMessage.replace('<TIME>', timeStr), this.appendBot);
+			this.time = new Date(this.time.getTime() + time);
+			return false;
 		}
 	}
 
-	getTimeString() {
-		if (this.time)
-			return `${util.makeTwoDigit(this.time.getHours())}:${util.makeTwoDigit(this.time.getMinutes())}`;
-		return '';
+	sendTime(isStart = false) {
+		if (this.time === null) {
+			if (this.notTimeHandler)
+				this.notTimeHandler();
+		} else if (isStart) {
+			if (this.startHandler)
+				this.startHandler(this.time);
+		} else if (this.renewHandler) {
+			this.renewHandler(this.time);
+		}
 	}
 
 	updateTimeout() {
-		if (this.handler !== null) {
-			clearTimeout(this.handler);
+		if (this.timeoutHandler !== null) {
+			clearTimeout(this.timeoutHandler);
 		}
-		this.handler = setTimeout(() => {
-			bot.say(this.endMessage, this.appendBot);
+		this.timeoutHandler = setTimeout(() => {
+			if (this.endHandler)
+				this.endHandler();
 			this.time = null;
-			this.handler = null;
+			this.timeoutHandler = null;
 		}, this.time.getTime() - new Date().getTime());
 	}
 

@@ -9,7 +9,8 @@ exports.END = END;
 exports.NOT_TIME = NOT_TIME;
 
 exports.Timer = class Timer {
-	constructor(addTime, startMessage, endMessage, notTimeMessage, calcTime = true, appendBot = true) {
+
+	constructor(addTime, calcTime = true) {
 		this.addTime = addTime;
 		this.time = null;
 		this.timeoutHandler = null;

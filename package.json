@@ -8,14 +8,14 @@
     "express-ws": "^4.0.0",
     "obs-websocket-js": "^4.0.2",
     "socket.io-client": "^2.3.0",
-    "twitch": "^4.2.0",
-    "twitch-auth": "^4.2.0",
+    "twitch": "^4.2.4",
+    "twitch-auth": "^4.2.4",
     "twitch-chat-client": "^4.2.4",
-    "twitch-pubsub-client": "4.2.0",
+    "twitch-pubsub-client": "4.2.4",
     "ws": "^7.3.1"
   },
-  "main": "bot.js",
-  "bin": "server.js",
+  "main": "tung.js",
+  "bin": "tung.js",
   "scripts": {
     "start": "nodemon server.js"
   },

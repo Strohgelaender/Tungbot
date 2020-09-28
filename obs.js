@@ -9,6 +9,7 @@ exports.getCurrentScene = () => currentScene;
 exports.connect = async () => {
 	await obs.connect({address: process.env.OBS_WEBSOCKET_ADDRESS, password: process.env.OBS_WEBSOCKET_PASSWORD});
 	obs.on('SwitchScenes', scene => currentScene = scene['scene-name']);
+	obs.send('GetCurrentScene').then(res => currentScene = res.name);
 	console.log('connected to OBS Websocket');
 }
 

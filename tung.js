@@ -15,6 +15,9 @@ const GAMING_FC = 'Gaming - FC Chatting';
 const JUST_CHATTING = 'Just Chatting';
 const JUST_CHATTING_SMALL = 'Bildschirm Just Chatting';
 
+//OBS Sources
+const SALT = 'Salz';
+
 const targetChannel = 'tungdiiltv';
 const targetChannelID = '444384436';
 let chatClient;
@@ -38,6 +41,7 @@ const timerData = [{
 }];
 
 let waterCount = 0; //TODO save value
+let saltActive = false;
 
 startup().then(() => console.log('setup finished')).catch(e => console.error(e));
 
@@ -83,6 +87,8 @@ function onMessageHandler(target, user, message, context) {
 	if (/^!top((\s?\d+)|(\s.*))$/.test(lmsg)) {
 		const num = parseInt(lmsg.substring(4).trim()) || 5;
 		se.getTopList(num, target).then(say).catch(console.log);
+	} else if ((checkCommand(lmsg, 'salz') || checkCommand(lmsg, 'salt')) && !saltActive) {
+		redeemSalt(user);
 	} else if (isModerator(context)) {
 		if (lmsg === '!rüstung' || lmsg === '!kraft' || lmsg === '!all') {
 			rewardAll(target);
@@ -150,4 +156,27 @@ async function switchCamScene() {
 		await switchScene(GAMING);
 	else if (currentScene === JUST_CHATTING)
 		await switchScene(JUST_CHATTING_SMALL);
+}
+
+function redeemSalt(user) {
+	//TODO integrate into Timers (make queueable)
+	se.payWithPoints(user, 1000, async () => {
+		try {
+			const scene = obs.getCurrentScene();
+			if (scene === GAMING || scene === GAMING_FC) {
+				saltActive = true;
+				await obs.setSourceVisibility(SALT, true);
+				setTimeout(() => {
+					saltActive = false;
+					obs.setSourceVisibility(SALT, false);
+				}, 7000);
+				console.log('Playing Salt Video');
+				return true;
+			}
+		} catch (e) {
+			console.error(e);
+			saltActive = false;
+		}
+		return false;
+	});
 }

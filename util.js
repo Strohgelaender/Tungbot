@@ -21,4 +21,4 @@ exports.makeTimeString = (time) => time ? `${makeTwoDigit(time.getHours())}:${ma
 
 exports.isModerator = context => context.userInfo.isMod || context.userInfo.isBroadcaster;
 
-exports.checkCommand = (msg, command) => msg.match(`^!${command}(\\s.*)?$`);
+exports.checkCommand = (msg, command) => RegExp(`^!${command}(\\s.*)?$`).test(msg);

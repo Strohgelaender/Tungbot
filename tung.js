@@ -80,7 +80,7 @@ function onMessageHandler(target, user, message, context) {
 	const msg = message.trim();
 	const lmsg = msg.toLowerCase();
 
-	if (lmsg.match('^!top\\s?\\d*$')) {
+	if (/^!top((\s?\d+)|(\s.*))$/.test(lmsg)) {
 		const num = parseInt(lmsg.substring(4).trim()) || 5;
 		se.getTopList(num, target).then(say).catch(console.log);
 	} else if (isModerator(context)) {

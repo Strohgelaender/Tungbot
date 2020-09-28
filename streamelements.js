@@ -61,6 +61,25 @@ async function addPoints(user, amount) {
 	return `${user} hat an der Bar ${amount} ${pointsName} bestellt und besitzt jetzt ${response.data.newAmount} ${pointsName}.`;
 }
 
+exports.addPoints = addPoints;
+
+async function checkPoints(user, amount, talk = true) {
+	//Check if user has enough Points
+	let response = await streamelements.get(`points/${process.env.STREAMELEMENTS_USER_ID}/${user}`);
+	if (response.status !== 200) {
+		console.log(response.data);
+		return false;
+	}
+	if (response.data.points < amount) {
+		if (talk)
+			say(`Leider hast du nicht genug ${pointsName} für diesen Command ${user} sicuiCry Du brauchst mindestens ${item.cost} ${pointsName}.`);
+		return false;
+	}
+	return true;
+}
+
+exports.checkPoints = checkPoints;
+
 exports.getTopList = async (limit = 5) => {
 	try {
 		const response = await streamelements.get(`points/${process.env.STREAMELEMENTS_USER_ID}/top?limit=${limit}`);
@@ -80,33 +99,34 @@ exports.getTopList = async (limit = 5) => {
 }
 
 async function redeemSound(item, user) {
-	try {
-		//Check if user has enough Points
-		let response = await streamelements.get(`points/${process.env.STREAMELEMENTS_USER_ID}/${user}`);
-		if (response.status !== 200) {
-			console.log(response.data);
-			return;
-		}
-		if (response.data.points < item.cost) {
-			return `Leider hast du nicht genug ${pointsName} für diesen Command ${user} sicuiCry Du brauchst mindestens ${item.cost} ${pointsName}.`;
-		}
-		//Add Ponts to Owner Account
+	await payWithPoints(user, item.cost, async () => {
+		//Add Points to Owner Account
 		await addPoints(channelName, item.cost);
 		//Redeem Sound
-		response = await streamelements.post(`store/${process.env.STREAMELEMENTS_USER_ID}/redemptions/${item._id}`);
+		const response = await streamelements.post(`store/${process.env.STREAMELEMENTS_USER_ID}/redemptions/${item._id}`);
 		if (response.status === 200) {
 			console.log(`Played Sound ${item.name}`);
-			if (user !== channelName) {
-				//Remove Points from User
-				await addPoints(user, -item.cost);
-			}
-		} else {
-			console.log(response.data);
+			return user !== channelName;
+		}
+		return false;
+	});
+}
+
+async function payWithPoints(user, amount, itemHandler, talk) {
+	try {
+		if (!await checkPoints(user, amount, talk))
+			return;
+
+		if (await itemHandler()) {
+			//Remove Points from User
+			await addPoints(user, -amount);
 		}
 	} catch (e) {
 		console.error(e.response.data);
 	}
 }
+
+exports.payWithPoints = payWithPoints;
 
 exports.getCounterValue = async counter => {
 	const response = await streamelements.get(`bot/${process.env.STREAMELEMENTS_USER_ID}/counters/${counter}`);
@@ -116,7 +136,4 @@ exports.getCounterValue = async counter => {
 	}
 	return response.data.value;
 }
-
-exports.addPoints = addPoints;
-exports.redeemSound = redeemSound;
 

@@ -17,5 +17,12 @@ exports.switchScene = name => obs.send('SetCurrentScene', {
 	'scene-name': name
 });
 
-//Gaming
-//Gaming - FC Chatting
+
+exports.setFilterVisibility = (sourceName, filterName, filterEnabled) => obs.send('SetSourceFilterVisibility', {
+	sourceName, filterName, filterEnabled
+});
+
+exports.setSourceVisibility = (source, visible) => obs.send('SetSceneItemProperties', {
+	item: source,
+	visible
+});

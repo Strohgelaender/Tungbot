@@ -72,7 +72,7 @@ async function checkPoints(user, amount, talk = true) {
 	}
 	if (response.data.points < amount) {
 		if (talk)
-			say(`Leider hast du nicht genug ${pointsName} für diesen Command ${user} sicuiCry Du brauchst mindestens ${item.cost} ${pointsName}.`);
+			say(`Leider hast du nicht genug ${pointsName} für diesen Command ${user} sicuiCry Du brauchst mindestens ${amount} ${pointsName}.`);
 		return false;
 	}
 	return true;
@@ -122,7 +122,10 @@ async function payWithPoints(user, amount, itemHandler, talk) {
 			await addPoints(user, -amount);
 		}
 	} catch (e) {
-		console.error(e.response.data);
+		if (e.hasOwnProperty('response'))
+			console.error(e.response.data);
+		else
+			console.error(e);
 	}
 }
 

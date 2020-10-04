@@ -5,6 +5,7 @@ require('dotenv').config();
 
 let items;
 let pointsName;
+let pointsAddedMessage;
 let channelName;
 
 const streamelements = axios.create({
@@ -16,6 +17,8 @@ const streamelements = axios.create({
 });
 
 exports.setChannelName = name => channelName = name;
+
+exports.setPointsAddedMessage = msg => pointsAddedMessage = msg;
 
 exports.downloadStreamelementsItems = async () => {
 	try {
@@ -58,7 +61,10 @@ async function addPoints(user, amount) {
 		console.log(response.data);
 		return;
 	}
-	return `${user} hat an der Bar ${amount} ${pointsName} bestellt und besitzt jetzt ${response.data.newAmount} ${pointsName}.`;
+	return pointsAddedMessage.replace(/%USER%/g, user)
+		.replace(/%AMOUNT%/g, amount)
+		.replace(/%NAME%/g, pointsName)
+		.replace(/%NEWAMOUNT%/g, response.data.newAmount);
 }
 
 exports.addPoints = addPoints;

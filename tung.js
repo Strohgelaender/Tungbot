@@ -58,6 +58,7 @@ async function startup() {
 	chatClient.onHosted(onHostHandler);
 
 	se.setChannelName(targetChannel);
+	se.setPointsAddedMessage('%USER% hat an der Bar %AMOUNT% %NAME% bestellt und besitzt jetzt %NEWAMOUNT% %NAME%.');
 	await seSocket.setupStreamelementsClient();
 
 	setupTimers();

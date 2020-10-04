@@ -1,4 +1,4 @@
-const {say} = require("./bot");
+const {say, getChatClient} = require("./bot");
 const {Timer, START, RENEW, END, NOT_TIME} = require('./timer');
 const {isModerator, checkCommand, makeTimeString} = require('./util');
 
@@ -36,12 +36,14 @@ exports.onChannelPointHandler = message => {
 	}
 }
 
-exports.registerTimer = (timer, command, rewardId) => {
+function registerTimer(timer, command, rewardId) {
 	if (command)
 		timerCommands.set(command, timer);
 	if (rewardId)
 		timerRewards.set(rewardId, timer);
 }
+
+exports.registerTimer = registerTimer;
 
 exports.createClothingTimer = (time, name, streamerName) => {
 	const timer = new Timer(time);
@@ -52,3 +54,10 @@ exports.createClothingTimer = (time, name, streamerName) => {
 	timer.on(NOT_TIME, () => say(`${streamerName} muss ${name} derzeit nicht tragen.`));
 	return timer;
 };
+
+exports.createEmoteOnlyTimer = (duration, targetChannel, rewardId) => {
+	const emoteTimer = new Timer(duration, false);
+	emoteTimer.on(START, async () => getChatClient().enableEmoteOnly(targetChannel));
+	emoteTimer.on(END, () => getChatClient().disableEmoteOnly(targetChannel));
+	registerTimer(emoteTimer, null, rewardId);
+}

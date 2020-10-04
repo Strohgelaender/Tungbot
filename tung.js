@@ -75,10 +75,7 @@ function setupTimers() {
 		data.timer = timer;
 	}
 
-	const emoteTimer = new Timer(2 * 60000, false);
-	emoteTimer.on(START, async () => chatClient.enableEmoteOnly(targetChannel));
-	emoteTimer.on(END, () => chatClient.disableEmoteOnly(targetChannel));
-	timerManager.registerTimer(emoteTimer, null, '4134f9e6-aeb6-43fa-a501-5cf3410b7d78');
+	timerManager.createEmoteOnlyTimer(2 * 60000, targetChannel, '4134f9e6-aeb6-43fa-a501-5cf3410b7d78');
 }
 
 function onMessageHandler(target, user, message, context) {

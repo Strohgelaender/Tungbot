@@ -15,7 +15,7 @@ exports.onMessageHandler = (target, user, message, context) => {
 			if (!mod || args.startsWith('time')) {
 				timer.sendTime();
 			} else if (mod) {
-				if (/^add -?\\d+$/.test(msg)) {
+				if (/^add -?\d+$/.test(args)) {
 					//add / remove time
 					const time = parseInt(args.substring(4)) * 60000;
 					timer.reward(time);

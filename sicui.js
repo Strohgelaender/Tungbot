@@ -9,7 +9,7 @@ const targetChannelID = '447731003';
 startup().then(() => console.log('startup completed')).catch(console.error);
 
 async function startup() {
-	await run(targetChannel, true);
+	await run(targetChannel, {connectChat: true, connectPubSub: true});
 
 	se.setChannelName(targetChannel);
 	se.setPointsAddedMessage('%USER% hat sich %AMOUNT% %NAME% gekauft und besitzt jetzt %NEWAMOUNT% %NAME%.');

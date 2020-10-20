@@ -4,8 +4,9 @@ const {run, getChatClient} = require("./bot");
 const targetChannel = '#toomda';
 
 startup();
+
 async function startup() {
-	await run(targetChannel, false);
+	await run(targetChannel, {connectChat: true, downloadSE: true});
 	se.setChannelName('toomda');
 	getChatClient().onMessage(se.onMessageHandler);
 }

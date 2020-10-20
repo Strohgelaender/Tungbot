@@ -27,14 +27,15 @@ exports.getChatClient = () => chatClient;
 
 let targetChannel;
 
-exports.run = async (target, connectPubSub = false) => {
+exports.run = async (target, config) => {
 	targetChannel = '#' + target;
 	const opts = {
 		channels: [target]
 	};
 	chatClient = new ChatClient(authProvider, opts);
+
 	try {
-		await startup(connectPubSub);
+		await startup(config);
 		//refresh Token every two hours
 		//workaround for a bug in the authProvider-library
 		setInterval(() => authProvider.refresh(), 2 * 60 * 60 * 1000);
@@ -45,10 +46,14 @@ exports.run = async (target, connectPubSub = false) => {
 	console.log('chat client started');
 }
 
-async function startup(connectPubSub) {
-	await connectChatClient();
-	await se.downloadStreamelementsItems();
-	if (connectPubSub) {
+async function startup(config) {
+	if (config.connectChat) {
+		await connectChatClient();
+	}
+	if (config.downloadSE) {
+		await se.downloadStreamelementsItems();
+	}
+	if (config.connectPubSub) {
 		await connectPubSubClient();
 	}
 }

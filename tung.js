@@ -50,7 +50,11 @@ let saltActive = false;
 startup().then(() => console.log('setup finished')).catch(e => console.error(e));
 
 async function startup() {
-	await run(targetChannel, true);
+	await run(targetChannel, {
+		connectChat: true,
+		downloadSE: true,
+		connectPubSub: true
+	});
 
 	chatClient = getChatClient();
 

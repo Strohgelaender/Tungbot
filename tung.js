@@ -17,6 +17,10 @@ const JUST_CHATTING_SMALL = 'Bildschirm Just Chatting';
 
 //OBS Sources
 const SALT = 'Salz';
+const CAM = 'Logitech C920';
+
+//OBS Filters
+const BLACK_WHITE = 'Schwarz/Weiß';
 
 const targetChannel = 'tungdiiltv';
 const targetChannelID = '444384436';
@@ -76,6 +80,11 @@ function setupTimers() {
 	}
 
 	timerManager.createEmoteOnlyTimer(2 * 60000, targetChannel, '4134f9e6-aeb6-43fa-a501-5cf3410b7d78');
+
+	const webcamTimer = new Timer(3 * 60000, false);
+	webcamTimer.on(START, () => setFilterVisibility(CAM, BLACK_WHITE, true));
+	webcamTimer.on(END, () => setFilterVisibility(CAM, BLACK_WHITE, false));
+	timerManager.registerTimer(webcamTimer, null, 'd69cb8a3-e4f6-4bb6-b0df-d08a27c77d29');
 }
 
 function onMessageHandler(target, user, message, context) {

@@ -2,17 +2,17 @@
   "name": "tungbot",
   "version": "1.0.0",
   "dependencies": {
-    "axios": "^0.20.0",
+    "axios": "^0.21.1",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-ws": "^4.0.0",
     "obs-websocket-js": "^4.0.2",
-    "socket.io-client": "^2.3.0",
-    "twitch": "^4.2.4",
-    "twitch-auth": "^4.2.4",
-    "twitch-chat-client": "^4.2.4",
-    "twitch-pubsub-client": "4.2.4",
-    "ws": "^7.3.1"
+    "socket.io-client": "^2.4.0",
+    "twitch": "^4.5.0",
+    "twitch-auth": "^4.5.0",
+    "twitch-chat-client": "^4.5.0",
+    "twitch-pubsub-client": "^4.5.0",
+    "ws": "^7.4.3"
   },
   "main": "tung.js",
   "bin": "tung.js",
@@ -24,8 +24,7 @@
     "url": "https://github.com/Strohgelaender/Tungbot"
   },
   "devDependencies": {
-    "nodemon": "^2.0.4",
-    "nexe": "^3.3.7"
+    "nodemon": "^2.0.7"
   },
   "author": "Strohgelaender"
 }

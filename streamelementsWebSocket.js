@@ -27,6 +27,9 @@ exports.setupStreamelementsClient = async () => {
 	if (setupDone)
 		return;
 
+	if (!process.env.STREAMELEMENTS_TOKEN)
+		return;
+
 	setupDone = true;
 	seSocket.on('connect', () => {
 		console.log('connecting to Streamelements Realtime Service...');

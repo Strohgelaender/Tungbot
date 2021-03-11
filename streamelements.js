@@ -45,12 +45,10 @@ exports.onMessageHandler = (target, user, message) => {
 	const msg = message.trim();
 	const lmsg = msg.toLowerCase();
 
-	if (items) {
-		for (const item of items) {
-			if (checkCommand(lmsg, item.bot.identifier.toLowerCase())) {
-				redeemSound(item, user).then(say);
-				break;
-			}
+	for (const item of (items || [])) {
+		if (checkCommand(lmsg, item.bot.identifier.toLowerCase())) {
+			redeemSound(item, user).then(say);
+			break;
 		}
 	}
 }
@@ -61,7 +59,7 @@ async function addPoints(user, amount) {
 		console.log(response.data);
 		return;
 	}
-	return pointsAddedMessage.replace(/%USER%/g, user)
+	return (pointsAddedMessage || '').replace(/%USER%/g, user)
 		.replace(/%AMOUNT%/g, amount)
 		.replace(/%NAME%/g, pointsName)
 		.replace(/%NEWAMOUNT%/g, response.data.newAmount);

@@ -14,7 +14,7 @@
     "twitch-chat-client": "^4.5.5",
     "twitch-electron-auth-provider": "^4.5.5",
     "twitch-pubsub-client": "^4.5.5",
-    "ws": "^7.4.5"
+    "ws": "^7.4.6"
   },
   "main": "tung.js",
   "bin": "tung.js",

@@ -4,7 +4,7 @@
   "dependencies": {
     "axios": "^0.21.1",
     "dotenv": "^8.5.1",
-    "electron": "^9.4.4",
+    "electron": "^13.6.6",
     "express": "^4.17.1",
     "express-ws": "^4.0.0",
     "obs-websocket-js": "^4.0.2",
